@@ -19,7 +19,6 @@ public class ControladorProductosYServicios {
         this.unidadesDeMedida = new ArrayList<UnidadDeMedida>();
     }
 
-
     public synchronized static ControladorProductosYServicios getInstance() {
 
         if (instance == null) {
@@ -27,17 +26,6 @@ public class ControladorProductosYServicios {
         }
         return instance;
     }
-
-
-
-
-
-
-
-
-
-
-
 
     // Alta de Item desde la Vista
     public ItemDTO registrarItem(String descripcion, String codigoUnidad, String iva, String idRubro, String tipoItem) {

@@ -92,6 +92,17 @@ public class ControladorProveedores {
         return null;
     }
 
+    public boolean existeProveedor(Proveedor proveedor) {
+        return proveedores.contains(proveedor);
+    }
+
+    public Farmared.model.cuentaCorriente.CuentaCorriente cuentaCorriente(Proveedor proveedor) {
+        if (existeProveedor(proveedor)) {
+            return proveedor.getCuentaCorriente();
+        }
+        return null;
+    }
+
     private Rubro buscarRubroPorNombre(String nombre) {
         for (Rubro r : rubrosGlobales) {
             if (r.getNombreRubro().equals(nombre)) {

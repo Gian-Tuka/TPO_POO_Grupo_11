@@ -16,8 +16,9 @@ public class CuentaCorriente {
 
     public CuentaCorriente(float topeDeuda) {
         this.topeDeuda = topeDeuda;
+        this.deudaActual = 0f;
+        this.comprobantes = new ArrayList<>();
     }
-
 
     public float getDeudaActual() {
         return deudaActual;
@@ -27,13 +28,14 @@ public class CuentaCorriente {
         return topeDeuda;
     }
 
-    private float calcularDeuda(){
-        return 2;
+    public Float calcularDeuda() {
+
+        return this.deudaActual;
     }
 
-    private void agregarComprobante(Comprobante comprobante){}
+    public void agregarComprobante(Comprobante comprobante) {
+        this.comprobantes.add(comprobante);
 
-
-
+    }
 }
 
