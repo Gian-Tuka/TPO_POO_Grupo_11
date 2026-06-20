@@ -1,26 +1,30 @@
 package Farmared.dto.user;
 
 import Farmared.model.user.Rol;
+import Farmared.model.user.Usuario;
 
 public class UsuarioDTO {
+    private String legajo;
     private String nombre;
     private String apellido;
     private String rol;
-    private String legajo;
+    private String area;
 
     //DTO para generar el alta desde la view (sin legajo)
-    public UsuarioDTO(String nombre, String apellido, String rol) {
+    public UsuarioDTO(String nombre, String apellido, String rol,  String area) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.rol = rol;
         this.legajo = null;
+        this.area = area;
     }
     // DTO para mostrar informacion en la view
-    public UsuarioDTO(String legajo, String nombre, String apellido, String rol) {
+    public UsuarioDTO(String legajo, String nombre, String apellido, String rol,  String area) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.rol = rol;
         this.legajo = legajo;
+        this.area = area;
     }
 
     public String getNombre() {
@@ -54,6 +58,9 @@ public class UsuarioDTO {
     public void setLegajo(String legajo) {
         this.legajo = legajo;
     }
+
+    public String getArea() {return area;}
+    public void setArea(String area) {this.area = area;}
 
     @Override
     public String toString() {

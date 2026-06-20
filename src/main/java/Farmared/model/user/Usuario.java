@@ -7,13 +7,17 @@ public class Usuario {
     private String nombre;
     private String apellido;
     private Rol rol;
+    private Area area;
+    private String password;
 
 
-    public Usuario(String nombre, String apellido, Rol rol) {
+    public Usuario(String nombre, String apellido, Rol rol, Area area, String password) {
         this.legajo = generarLegajo();
         this.nombre = nombre;
         this.apellido = apellido;
         this.rol = rol;
+        this.area = area;
+        this.password = password;
     }
 
 
@@ -41,12 +45,22 @@ public class Usuario {
         this.apellido = apellido;
     }
 
-    public Rol getRol() {
-        return rol;
-    }
+    public Rol getRol() {return rol;}
 
     public void setRol(Rol rol) {
         this.rol = rol;
+    }
+
+    public Area getArea() { return area; }
+    public void setArea(Area area) { this.area = area; }
+
+    private void setPassword(String password) {
+        this.password = password;
+    }
+
+
+    public Boolean validarPassword(String password) {
+        return password.equals(this.password);
     }
 
     private String generarLegajo() {
