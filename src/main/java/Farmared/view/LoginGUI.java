@@ -1,5 +1,6 @@
 package Farmared.view;
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
+import Farmared.utils.Validations;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,10 +46,11 @@ public class LoginGUI extends JDialog {
 
         // Evento Ingresar: Conecta con tu Controlador
         btnIngresar.addActionListener(e -> {
-            String legajo = txtLegajo.getText().trim();
+            String legajo = txtLegajo.getText();
             String password = new String(txtPassword.getPassword());
 
-            if (legajo.isEmpty() || password.isEmpty()) {
+            Validations v = new Validations();
+            if (v.isNullOrEmpty(legajo) || v.isNullOrEmpty(password)) {
                 JOptionPane.showMessageDialog(this, "Por favor, complete ambos campos.", "Campos Vacíos", JOptionPane.WARNING_MESSAGE);
                 return;
             }

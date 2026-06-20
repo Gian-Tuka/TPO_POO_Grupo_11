@@ -100,8 +100,9 @@ public class VistaModificarProveedor extends JDialog {
     }
 
     private void buscarProveedor() {
-        String cuit = txtBuscarCuit.getText().trim();
-        if (cuit.isEmpty()) {
+        String cuit = txtBuscarCuit.getText();
+        Validations v = new Validations();
+        if (v.isNullOrEmpty(cuit)) {
             JOptionPane.showMessageDialog(this, "Ingrese un CUIT", "Atención", JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -149,6 +150,18 @@ public class VistaModificarProveedor extends JDialog {
 
             if (!v.validCuit(txtCuit.getText())) {
                 throw new Exception("Cuit invalido");
+            }
+
+            v.requireNonEmpty(txtRazonSocial.getText(), "La Razón Social es requerida");
+            
+            if (!v.validEmail(txtCorreo.getText())) {
+                throw new Exception("El formato del correo es inválido");
+            }
+            if (!v.validPhone(txtTelefono.getText())) {
+                throw new Exception("El número de teléfono es inválido");
+            }
+            if (!v.isFloat(txtTopeDeuda.getText())) {
+                throw new Exception("El tope de deuda debe ser numérico");
             }
 
             ProveedorDTO dto = new ProveedorDTO(

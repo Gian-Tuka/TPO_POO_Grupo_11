@@ -11,7 +11,7 @@ import Farmared.model.rubro.Rubro;
 import Farmared.model.rubro.TipoRubro;
 import Farmared.utils.Domicilio;
 import Farmared.utils.UtilDate;
-
+import Farmared.utils.Validations;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -130,8 +130,9 @@ public class ControladorProveedores {
         // COMUNICACIÓN INTER-CONTROLADOR: Llamada al Singleton de Items para obtener el modelo real
         Item item = ControladorProductosYServicios.getInstance().buscarItemModeloPorCodigo(codigoItem);
 
-        if (prov == null) throw new RuntimeException("Error: No se encontró el Proveedor especificado.");
-        if (item == null) throw new RuntimeException("Error: No se encontró el Artículo o Servicio.");
+        Validations v = new Validations();
+        v.requireNonNull(prov, "Error: No se encontró el Proveedor especificado.");
+        v.requireNonNull(item, "Error: No se encontró el Artículo o Servicio.");
 
         // Construimos la clase intermedia de asociación
         PrecioProveedor nuevoPrecio = new PrecioProveedor(item, prov, valorPrecio, new Date());

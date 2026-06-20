@@ -2,7 +2,7 @@ package Farmared.view.proveedorGUI;
 
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.proveedor.ProveedorDTO;
-
+import Farmared.utils.Validations;
 import javax.swing.*;
 import java.awt.*;
 
@@ -46,8 +46,9 @@ public class VistaEliminarProveedor extends JDialog {
     }
 
     private void buscarProveedor() {
-        String cuit = txtBuscarCuit.getText().trim();
-        if (cuit.isEmpty()) {
+        String cuit = txtBuscarCuit.getText();
+        Validations v = new Validations();
+        if (v.isNullOrEmpty(cuit)) {
             JOptionPane.showMessageDialog(this, "Ingrese un CUIT", "Atención", JOptionPane.WARNING_MESSAGE);
             return;
         }
