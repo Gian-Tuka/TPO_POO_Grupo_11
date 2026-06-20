@@ -20,15 +20,15 @@ public class ControladorUsuariosYSeguridad {
 
         // 2. ADENTRO del constructor sí podés usar el .add() sin errores:
         Usuario supervisor = new Usuario("Carlos", "Gomez", Rol.SUPERVISOR, Area.SISTEMAS, "admin123");
-        supervisor.setLegajo("LU1000"); // Legajo fijo para testear fácil
+        supervisor.setLegajo("LU-1000"); // Legajo fijo para testear fácil
         usuarios.add(supervisor);
 
         Usuario empleadoCompras = new Usuario("Ana", "Martinez", Rol.EMPLEADO, Area.COMPRAS, "1315");
-        empleadoCompras.setLegajo("LU2000");
+        empleadoCompras.setLegajo("LU-2000");
         usuarios.add(empleadoCompras);
 
         Usuario empleadoTesoreria = new Usuario("Juan", "Rodriguez", Rol.EMPLEADO, Area.TESORERIA, "1315");
-        empleadoTesoreria.setLegajo("LU3000");
+        empleadoTesoreria.setLegajo("LU-3000");
         usuarios.add(empleadoTesoreria);
     }
 

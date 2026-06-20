@@ -3,15 +3,23 @@ package Farmared;
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
 import Farmared.view.LoginGUI;
 import Farmared.view.proveedorGUI.VistaAltaProveedor;
+import Farmared.view.proveedorGUI.VistaModificarProveedor;
+import Farmared.view.proveedorGUI.VistaEliminarProveedor;
 import Farmared.view.rubro.VistaAltaRubro;
 
+import Farmared.controller.proveedores.ControladorProveedores;
+import Farmared.dto.proveedor.ProveedorDTO;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class MenuPrincipal extends JFrame {
 
     private JPanel cardPanel; // Contenedor dinámico
     private CardLayout cardLayout;
+    private DefaultTableModel modeloTablaProveedores;
 
     public MenuPrincipal() {
         ControladorUsuariosYSeguridad authController = ControladorUsuariosYSeguridad.getInstance();
@@ -95,25 +103,61 @@ public class MenuPrincipal extends JFrame {
         barraAcciones.add(btnEliminar);
         panel.add(barraAcciones, BorderLayout.NORTH);
 
-        // Tabla de historial (Mocks / Datos simulados)
-        String[] columnas = {"ID", "Nombre/Razón Social", "CUIT", "Teléfono", "Estado"};
-        Object[][] datosSimulados = {
-                {"1", "Proveedor Alfa S.A.", "30-12345678-9", "4555-1234", "Activo"},
-                {"2", "Distribuidora Beta SRL", "30-87654321-9", "4555-5678", "Activo"},
-                {"3", "Logística Gamma", "27-11223344-5", "4555-9012", "Inactivo"}
+        // Tabla de historial dinámica
+        String[] columnas = {"Razón Social", "CUIT", "Teléfono", "Condición IVA"};
+        modeloTablaProveedores = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Hacer que la tabla no sea editable directamente
+            }
         };
-
-        JTable tabla = new JTable(datosSimulados, columnas);
+        
+        JTable tabla = new JTable(modeloTablaProveedores);
         JScrollPane scrollPane = new JScrollPane(tabla);
         panel.add(scrollPane, BorderLayout.CENTER);
+
+        // Cargar los datos la primera vez
+        actualizarTablaProveedores();
 
         // CREAR PROVEEDOR
         btnNuevo.addActionListener(e -> {
             VistaAltaProveedor vistaAltaProveedor = new VistaAltaProveedor();
+            vistaAltaProveedor.setModal(true);
             vistaAltaProveedor.setVisible(true);
+            actualizarTablaProveedores();
+        });
+
+        // MODIFICAR PROVEEDOR
+        btnModificar.addActionListener(e -> {
+            VistaModificarProveedor vistaModificarProveedor = new VistaModificarProveedor();
+            vistaModificarProveedor.setModal(true);
+            vistaModificarProveedor.setVisible(true);
+            actualizarTablaProveedores();
+        });
+
+        // ELIMINAR PROVEEDOR
+        btnEliminar.addActionListener(e -> {
+            VistaEliminarProveedor vistaEliminarProveedor = new VistaEliminarProveedor();
+            vistaEliminarProveedor.setModal(true);
+            vistaEliminarProveedor.setVisible(true);
+            actualizarTablaProveedores();
         });
 
         return panel;
+    }
+
+    private void actualizarTablaProveedores() {
+        modeloTablaProveedores.setRowCount(0); // Limpiar la tabla
+        ArrayList<ProveedorDTO> listaProveedores = ControladorProveedores.getInstance().obtenerProveedoresDTO();
+        for (ProveedorDTO p : listaProveedores) {
+            Object[] fila = {
+                    p.getRazonSocial(),
+                    p.getCuit(),
+                    p.getTelefono(),
+                    p.getCondicionIVA()
+            };
+            modeloTablaProveedores.addRow(fila);
+        }
     }
 
     //TODO: reemplazar por cada una de las opciones para cada modulo

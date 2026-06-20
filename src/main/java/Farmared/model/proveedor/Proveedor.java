@@ -113,6 +113,38 @@ public class Proveedor {
     public ArrayList<PrecioProveedor> getPrecioPorItem() {
         return precioPorItem;
     }
+
+    public void setRazonSocial(String razonSocial) {
+        this.razonSocial = razonSocial;
+    }
+
+    public void setNombreFantasia(String nombreFantasia) {
+        this.nombreFantasia = nombreFantasia;
+    }
+
+    public void setDomicilioComercial(Domicilio domicilioComercial) {
+        this.domicilioComercial = domicilioComercial;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public void setCondicionIVA(CondicionIVA condicionIVA) {
+        this.condicionIVA = condicionIVA;
+    }
+
+    public void setNroIngBru(String nroIngBru) {
+        this.nroIngBru = nroIngBru;
+    }
+
+    public void setRubroProveedor(ArrayList<Rubro> rubroProveedor) {
+        this.rubroProveedor = rubroProveedor;
+    }
 }
 
 

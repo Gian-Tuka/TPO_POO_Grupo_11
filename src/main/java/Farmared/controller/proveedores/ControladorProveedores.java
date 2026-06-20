@@ -25,6 +25,7 @@ public class ControladorProveedores {
     private ControladorProveedores() {
         this.proveedores = new ArrayList<Proveedor>();
         this.rubrosGlobales = new ArrayList<Rubro>();
+        cargarDatosSimulados();
     }
 
     public synchronized static ControladorProveedores getInstance() {
@@ -53,6 +54,73 @@ public class ControladorProveedores {
 
         this.proveedores.add(nuevo);
         return toDTO(nuevo);
+    }
+
+    public ProveedorDTO modificarProveedor(ProveedorDTO dto) throws Exception {
+        Proveedor proveedor = buscarProveedorPorCuit(dto.getCuit());
+        if (proveedor == null) {
+            throw new Exception("No existe un proveedor registrado con el CUIT: " + dto.getCuit());
+        }
+
+        proveedor.setRazonSocial(dto.getRazonSocial());
+        proveedor.setNombreFantasia(dto.getNombreFantasia());
+        proveedor.setDomicilioComercial(new Domicilio(dto.getCalle(), dto.getNumeroDpto(), dto.getCodigoPostal(), dto.getCiudad(), dto.getPais()));
+        proveedor.setTelefono(dto.getTelefono());
+        proveedor.setCorreo(dto.getCorreo());
+        proveedor.setCondicionIVA(CondicionIVA.valueOf(dto.getCondicionIVA()));
+        proveedor.setNroIngBru(dto.getNroIngBru());
+        proveedor.getCuentaCorriente().getTopeDeuda();
+
+        ArrayList<Rubro> nuevosRubros = new ArrayList<>();
+        for (String nombreRubro : dto.getIdsRubros()) {
+            Rubro r = buscarRubroPorNombre(nombreRubro);
+            if (r != null) {
+                nuevosRubros.add(r);
+            }
+        }
+        proveedor.setRubroProveedor(nuevosRubros);
+
+        return toDTO(proveedor);
+    }
+
+    public void eliminarProveedor(String cuit) throws Exception {
+        Proveedor proveedor = buscarProveedorPorCuit(cuit);
+        if (proveedor == null) {
+            throw new Exception("No existe un proveedor registrado con el CUIT: " + cuit);
+        }
+        this.proveedores.remove(proveedor);
+    }
+
+    public ProveedorDTO buscarProveedorDTOPorCuit(String cuit) {
+        Proveedor proveedor = buscarProveedorPorCuit(cuit);
+        if (proveedor != null) {
+            return toDTO(proveedor);
+        }
+        return null;
+    }
+
+    public ArrayList<ProveedorDTO> obtenerProveedoresDTO() {
+        ArrayList<ProveedorDTO> lista = new ArrayList<>();
+        for (Proveedor p : proveedores) {
+            lista.add(toDTO(p));
+        }
+        return lista;
+    }
+
+    private void cargarDatosSimulados() {
+        if (this.proveedores.isEmpty()) {
+            try {
+                ProveedorDTO dto1 = new ProveedorDTO("30-12345678-1", "Proveedor Alfa S.A.", "Alfa", "Calle Falsa", "123", "1000", "CABA", "Argentina", "4555-1234", "alfa@test.com", "RESPONSABLE_INSCRIPTO", "12345", "", 100000f, new ArrayList<>());
+                ProveedorDTO dto2 = new ProveedorDTO("30-87654321-0", "Distribuidora Beta SRL", "Beta", "Avenida Siempreviva", "742", "1000", "CABA", "Argentina", "4555-5678", "beta@test.com", "MONOTRIBUTISTA", "54321", "", 50000f, new ArrayList<>());
+                ProveedorDTO dto3 = new ProveedorDTO("27-11223344-5", "Logística Gamma", "Gamma", "Ruta 9", "Km 50", "1629", "Pilar", "Argentina", "4555-9012", "gamma@test.com", "EXENTO", "11223", "", 25000f, new ArrayList<>());
+                
+                this.proveedores.add(toModel(dto1));
+                this.proveedores.add(toModel(dto2));
+                this.proveedores.add(toModel(dto3));
+            } catch (Exception e) {
+                // Ignore errors during simulation loading
+            }
+        }
     }
 
     // REGISTRO DE PRECIO: Doble amarre usando consistencia bidireccional
