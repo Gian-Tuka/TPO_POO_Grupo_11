@@ -4,7 +4,6 @@ import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.rubro.Rubro;
 import Farmared.utils.GeneradorDeCodigos;
 import java.util.ArrayList;
-import java.util.UUID;
 
 public abstract class Item {
     protected String codigo;

@@ -2,8 +2,6 @@ package Farmared.model.rubro;
 
 import Farmared.utils.GeneradorDeCodigos;
 
-import java.util.UUID;
-
 public class Rubro {
     private String idRubro;
     private String nombreRubro;
