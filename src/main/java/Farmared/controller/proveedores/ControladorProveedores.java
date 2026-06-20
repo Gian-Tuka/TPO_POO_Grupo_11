@@ -9,6 +9,9 @@ import Farmared.model.proveedor.CondicionIVA;
 import Farmared.model.proveedor.Proveedor;
 import Farmared.model.rubro.Rubro;
 import Farmared.model.rubro.TipoRubro;
+import Farmared.model.user.Area;
+import Farmared.model.user.Rol;
+import Farmared.model.user.Usuario;
 import Farmared.utils.Domicilio;
 import Farmared.utils.UtilDate;
 
@@ -26,6 +29,19 @@ public class ControladorProveedores {
         this.proveedores = new ArrayList<Proveedor>();
         this.rubrosGlobales = new ArrayList<Rubro>();
         cargarDatosSimulados();
+
+        // 2. ADENTRO del constructor sí podés usar el .add() sin errores:
+        Domicilio domicilio = new Domicilio("Av. Falsa", "123", "1234", "Springfield", "Argentina");
+        Date miFecha = UtilDate.stringToDate("01/01/2000");
+
+        Proveedor proveedor1 = new Proveedor("30-00000000-1", "Gomez S.A", "Gomesitos", domicilio, "12344321",
+                "gomesitos@gomez.com.ar", CondicionIVA.RESPONSABLE_INSCRIPTO, "888888888", miFecha, 10000000);
+
+        Proveedor proveedor2 = new Proveedor("30-00000000-2", "Zemog S.A", "Random", domicilio, "99988877",
+                "zemog5@gomez.com.ar", CondicionIVA.RESPONSABLE_INSCRIPTO, "888888888", miFecha, 10000000);
+
+        proveedores.add(proveedor1);
+        proveedores.add(proveedor2);
     }
 
     public synchronized static ControladorProveedores getInstance() {
@@ -120,7 +136,7 @@ public class ControladorProveedores {
                 ProveedorDTO dto1 = new ProveedorDTO("30-12345678-1", "Proveedor Alfa S.A.", "Alfa", "Calle Falsa", "123", "1000", "CABA", "Argentina", "4555-1234", "alfa@test.com", "RESPONSABLE_INSCRIPTO", "12345", "", 100000f, new ArrayList<>());
                 ProveedorDTO dto2 = new ProveedorDTO("30-87654321-0", "Distribuidora Beta SRL", "Beta", "Avenida Siempreviva", "742", "1000", "CABA", "Argentina", "4555-5678", "beta@test.com", "MONOTRIBUTISTA", "54321", "", 50000f, new ArrayList<>());
                 ProveedorDTO dto3 = new ProveedorDTO("27-11223344-5", "Logística Gamma", "Gamma", "Ruta 9", "Km 50", "1629", "Pilar", "Argentina", "4555-9012", "gamma@test.com", "EXENTO", "11223", "", 25000f, new ArrayList<>());
-                
+
                 this.proveedores.add(toModel(dto1));
                 this.proveedores.add(toModel(dto2));
                 this.proveedores.add(toModel(dto3));
@@ -247,7 +263,13 @@ public class ControladorProveedores {
                 nombresRubros
         );
     }
-
+    public ArrayList<ProveedorDTO> obtenerProveedores () {
+        ArrayList<ProveedorDTO> listaProveedoresDTO = new ArrayList<>();
+        for (Proveedor p : proveedores) {
+            listaProveedoresDTO.add(toDTO(p));
+        }
+        return listaProveedoresDTO;
+    }
     private static RubroDTO toDTORubro(Rubro model) {
         return new RubroDTO(
                 model.getIdRubro(),

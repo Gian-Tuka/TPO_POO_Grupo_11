@@ -1,6 +1,9 @@
 package Farmared;
 
+import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
+import Farmared.dto.proveedor.ProveedorDTO;
+import Farmared.model.proveedor.Proveedor;
 import Farmared.view.LoginGUI;
 import Farmared.view.proveedorGUI.VistaAltaProveedor;
 import Farmared.view.proveedorGUI.VistaModificarProveedor;
@@ -96,18 +99,21 @@ public class MenuPrincipal extends JFrame {
 
     // PANTALLA DEL MÓDULO DE PROVEEDORES //TODO: Reemplazar por cada C.U: ABM de Proveedores
     private JPanel crearPanelProveedores() {
+        ControladorProveedores proveedorController = ControladorProveedores.getInstance();
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Barra de acciones superior (CRUD)
         JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnNuevo = new JButton("Crear Proveedor");
-        JButton btnModificar = new JButton("Modificar Proveedor");
-        JButton btnEliminar = new JButton("Eliminar Proveedor");
+        JButton btnNuevoProveedor = new JButton("Crear Proveedor");
+        JButton btnModificarProveedor = new JButton("Modificar Proveedor");
+        JButton btnEliminarProveedor = new JButton("Eliminar Proveedor");
+        JButton btnCrearRubro = new JButton("Crear Rubro");
 
-        barraAcciones.add(btnNuevo);
-        barraAcciones.add(btnModificar);
-        barraAcciones.add(btnEliminar);
+        barraAcciones.add(btnNuevoProveedor);
+        barraAcciones.add(btnModificarProveedor);
+        barraAcciones.add(btnEliminarProveedor);
+        barraAcciones.add(btnCrearRubro);
         panel.add(barraAcciones, BorderLayout.NORTH);
 
         // Tabla de historial dinámica
@@ -118,7 +124,7 @@ public class MenuPrincipal extends JFrame {
                 return false; // Hacer que la tabla no sea editable directamente
             }
         };
-        
+
         JTable tabla = new JTable(modeloTablaProveedores);
         JScrollPane scrollPane = new JScrollPane(tabla);
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -127,7 +133,7 @@ public class MenuPrincipal extends JFrame {
         actualizarTablaProveedores();
 
         // CREAR PROVEEDOR
-        btnNuevo.addActionListener(e -> {
+        btnNuevoProveedor.addActionListener(e -> {
             VistaAltaProveedor vistaAltaProveedor = new VistaAltaProveedor();
             vistaAltaProveedor.setModal(true);
             vistaAltaProveedor.setVisible(true);
@@ -135,7 +141,7 @@ public class MenuPrincipal extends JFrame {
         });
 
         // MODIFICAR PROVEEDOR
-        btnModificar.addActionListener(e -> {
+        btnModificarProveedor.addActionListener(e -> {
             VistaModificarProveedor vistaModificarProveedor = new VistaModificarProveedor();
             vistaModificarProveedor.setModal(true);
             vistaModificarProveedor.setVisible(true);
@@ -143,7 +149,7 @@ public class MenuPrincipal extends JFrame {
         });
 
         // ELIMINAR PROVEEDOR
-        btnEliminar.addActionListener(e -> {
+        btnEliminarProveedor.addActionListener(e -> {
             VistaEliminarProveedor vistaEliminarProveedor = new VistaEliminarProveedor();
             vistaEliminarProveedor.setModal(true);
             vistaEliminarProveedor.setVisible(true);
