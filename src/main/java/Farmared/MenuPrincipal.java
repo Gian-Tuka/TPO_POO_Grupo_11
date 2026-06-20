@@ -2,6 +2,7 @@ package Farmared;
 
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
 import Farmared.view.LoginGUI;
+import Farmared.view.proveedorGUI.GUIProveedor;
 import Farmared.view.proveedorGUI.VistaAltaProveedor;
 import Farmared.view.proveedorGUI.VistaModificarProveedor;
 import Farmared.view.proveedorGUI.VistaEliminarProveedor;
@@ -59,7 +60,7 @@ public class MenuPrincipal extends JFrame {
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
 
-        cardPanel.add(crearPanelProveedores(), "PROVEEDORES");
+        cardPanel.add(new GUIProveedor(), "PROVEEDORES");
         cardPanel.add(crearPanelProductos(), "PRODUCTOS");
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Compra (OC)"), "OC");
         cardPanel.add(crearPanelOrdenesPago(), "OP");
@@ -83,58 +84,6 @@ public class MenuPrincipal extends JFrame {
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         return btn;
-    }
-
-    private JPanel crearPanelProveedores() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnNuevo = new JButton("Crear Proveedor");
-        JButton btnModificar = new JButton("Modificar Proveedor");
-        JButton btnEliminar = new JButton("Eliminar Proveedor");
-
-        barraAcciones.add(btnNuevo);
-        barraAcciones.add(btnModificar);
-        barraAcciones.add(btnEliminar);
-        panel.add(barraAcciones, BorderLayout.NORTH);
-
-        String[] columnas = {"Razón Social", "CUIT", "Teléfono", "Condición IVA"};
-        modeloTablaProveedores = new DefaultTableModel(columnas, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        JTable tabla = new JTable(modeloTablaProveedores);
-        JScrollPane scrollPane = new JScrollPane(tabla);
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        actualizarTablaProveedores();
-
-        btnNuevo.addActionListener(e -> {
-            VistaAltaProveedor vistaAltaProveedor = new VistaAltaProveedor();
-            vistaAltaProveedor.setModal(true);
-            vistaAltaProveedor.setVisible(true);
-            actualizarTablaProveedores();
-        });
-
-        btnModificar.addActionListener(e -> {
-            VistaModificarProveedor vistaModificarProveedor = new VistaModificarProveedor();
-            vistaModificarProveedor.setModal(true);
-            vistaModificarProveedor.setVisible(true);
-            actualizarTablaProveedores();
-        });
-
-        btnEliminar.addActionListener(e -> {
-            VistaEliminarProveedor vistaEliminarProveedor = new VistaEliminarProveedor();
-            vistaEliminarProveedor.setModal(true);
-            vistaEliminarProveedor.setVisible(true);
-            actualizarTablaProveedores();
-        });
-
-        return panel;
     }
 
     private JPanel crearPanelProductos() {
@@ -238,20 +187,6 @@ public class MenuPrincipal extends JFrame {
         });
 
         return panel;
-    }
-
-    private void actualizarTablaProveedores() {
-        modeloTablaProveedores.setRowCount(0);
-        ArrayList<ProveedorDTO> listaProveedores = ControladorProveedores.getInstance().obtenerProveedoresDTO();
-        for (ProveedorDTO p : listaProveedores) {
-            Object[] fila = {
-                    p.getRazonSocial(),
-                    p.getCuit(),
-                    p.getTelefono(),
-                    p.getCondicionIVA()
-            };
-            modeloTablaProveedores.addRow(fila);
-        }
     }
 
     private JPanel crearPanelGenerico(String titulo) {
