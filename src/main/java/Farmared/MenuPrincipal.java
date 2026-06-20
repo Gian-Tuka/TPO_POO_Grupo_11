@@ -10,6 +10,9 @@ import Farmared.view.rubro.VistaAltaRubro;
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.proveedor.ProveedorDTO;
 
+import Farmared.controller.item.ControladorProductosYServicios;
+import Farmared.dto.item.ItemDTO;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -20,6 +23,8 @@ public class MenuPrincipal extends JFrame {
     private JPanel cardPanel; // Contenedor dinámico
     private CardLayout cardLayout;
     private DefaultTableModel modeloTablaProveedores;
+    private DefaultTableModel modeloTablaProductos;
+    private DefaultTableModel modeloTablaServicios;
 
     public MenuPrincipal() {
         ControladorUsuariosYSeguridad authController = ControladorUsuariosYSeguridad.getInstance();
@@ -148,24 +153,38 @@ public class MenuPrincipal extends JFrame {
 
         panel.add(barraAcciones, BorderLayout.NORTH);
 
-        String[] columnas = {"Descripción", "Unidad de Medida", "Precio", "IVA", "Rubro"};
-        Object[][] datosSimulados = {
-                {"Amoxicilina 500mg", "Caja", "$1500", "21%", "Medicamentos"},
-                {"Alcohol en Gel", "Litro", "$800", "10.5%", "Higiene"}
-        };
+        JTabbedPane tabbedPane = new JTabbedPane();
 
-        JTable tabla = new JTable(datosSimulados, columnas);
-        JScrollPane scrollPane = new JScrollPane(tabla);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        // Tabla Productos
+        String[] columnasProductos = {"Código", "Descripción", "Unidad", "IVA", "Rubro", "Precio Vigente"};
+        modeloTablaProductos = new DefaultTableModel(columnasProductos, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        JTable tablaProductos = new JTable(modeloTablaProductos);
+        tabbedPane.addTab("Productos", new JScrollPane(tablaProductos));
+
+        // Tabla Servicios
+        String[] columnasServicios = {"Código", "Descripción", "Unidad", "IVA", "Rubro", "Precio Vigente"};
+        modeloTablaServicios = new DefaultTableModel(columnasServicios, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        JTable tablaServicios = new JTable(modeloTablaServicios);
+        tabbedPane.addTab("Servicios", new JScrollPane(tablaServicios));
+
+        panel.add(tabbedPane, BorderLayout.CENTER);
 
         btnNuevo.addActionListener(e -> {
             Farmared.view.ProductoDialog dialog = new Farmared.view.ProductoDialog(this);
             dialog.setVisible(true);
+            actualizarTablasProductos();
         });
 
         btnNuevoServicio.addActionListener(e -> {
             Farmared.view.ServicioDialog dialog = new Farmared.view.ServicioDialog(this);
             dialog.setVisible(true);
+            actualizarTablasProductos();
         });
 
         btnNuevaUnidad.addActionListener(e -> {
@@ -173,7 +192,25 @@ public class MenuPrincipal extends JFrame {
             dialog.setVisible(true);
         });
 
+        actualizarTablasProductos();
+
         return panel;
+    }
+
+    private void actualizarTablasProductos() {
+        modeloTablaProductos.setRowCount(0);
+        ArrayList<ItemDTO> productos = ControladorProductosYServicios.getInstance().obtenerSoloProductos();
+        for (ItemDTO p : productos) {
+            Object[] fila = { p.getCodigo(), p.getDescripcionDeItem(), p.getUnidadMedida(), p.getTipoDeIVA(), p.getRubro(), p.getPrecioItem() };
+            modeloTablaProductos.addRow(fila);
+        }
+
+        modeloTablaServicios.setRowCount(0);
+        ArrayList<ItemDTO> servicios = ControladorProductosYServicios.getInstance().obtenerSoloServicios();
+        for (ItemDTO s : servicios) {
+            Object[] fila = { s.getCodigo(), s.getDescripcionDeItem(), s.getUnidadMedida(), s.getTipoDeIVA(), s.getRubro(), s.getPrecioItem() };
+            modeloTablaServicios.addRow(fila);
+        }
     }
 
     private JPanel crearPanelOrdenesPago() {
