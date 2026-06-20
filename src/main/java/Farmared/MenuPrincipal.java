@@ -3,6 +3,7 @@ package Farmared;
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
 import Farmared.view.LoginGUI;
 import Farmared.view.proveedorGUI.VistaAltaProveedor;
+import Farmared.view.rubro.VistaAltaRubro;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,12 +47,12 @@ public class MenuPrincipal extends JFrame {
 
         add(sidebar, BorderLayout.WEST);
 
-
+        // 2. Panel Central Dinámico (CardLayout)
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
 
         // Añadimos las vistas de los módulos (por ahora paneles de ejemplo)
-        cardPanel.add(crearABMProveedor(), "PROVEEDORES");
+        cardPanel.add(crearPanelProveedores(), "PROVEEDORES");
         cardPanel.add(crearPanelGenerico("Módulo de Productos"), "PRODUCTOS");
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Compra (OC)"), "OC");
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Pago (OP)"), "OP");
@@ -79,7 +80,7 @@ public class MenuPrincipal extends JFrame {
     }
 
     // PANTALLA DEL MÓDULO DE PROVEEDORES //TODO: Reemplazar por cada C.U: ABM de Proveedores
-    private JPanel crearABMProveedor() {
+    private JPanel crearPanelProveedores() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
