@@ -65,7 +65,7 @@ public class Usuario {
 
     private String generarLegajo() {
         GeneradorDeCodigos gdc = new GeneradorDeCodigos();
-        return gdc.generarCodigo("Lu", 4);
+        return gdc.generarCodigo("LU", 4);
     }
 
     @Override

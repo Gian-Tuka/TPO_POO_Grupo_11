@@ -1,7 +1,8 @@
 package Farmared;
 
+import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
+import Farmared.view.LoginGUI;
 import Farmared.view.proveedorGUI.VistaAltaProveedor;
-import Farmared.view.rubro.VistaAltaRubro;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +13,7 @@ public class MenuPrincipal extends JFrame {
     private CardLayout cardLayout;
 
     public MenuPrincipal() {
+        ControladorUsuariosYSeguridad authController = ControladorUsuariosYSeguridad.getInstance();
         setTitle("Sistema de Gestión Integrado");
         setSize(1024, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,21 +36,22 @@ public class MenuPrincipal extends JFrame {
         JButton btnComprobantes = crearBotónMenu("Comprobantes");
         JButton btnSeguridad = crearBotónMenu("Seguridad");
 
-        sidebar.add(btnProveedores);
-        sidebar.add(btnProductos);
-        sidebar.add(btnOC);
-        sidebar.add(btnOP);
-        sidebar.add(btnComprobantes);
-        sidebar.add(btnSeguridad);
+
+        if (authController.tieneAccesoAModulo("PROVEEDORES")) sidebar.add(btnProveedores);
+        if (authController.tieneAccesoAModulo("PRODUCTOS")) sidebar.add(btnProductos);
+        if (authController.tieneAccesoAModulo("OC")) sidebar.add(btnOC);
+        if (authController.tieneAccesoAModulo("OP")) sidebar.add(btnOP);
+        if (authController.tieneAccesoAModulo("COMPROBANTES")) sidebar.add(btnComprobantes);
+        if (authController.tieneAccesoAModulo("SEGURIDAD")) sidebar.add(btnSeguridad);
 
         add(sidebar, BorderLayout.WEST);
 
-        // 2. Panel Central Dinámico (CardLayout)
+
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
 
         // Añadimos las vistas de los módulos (por ahora paneles de ejemplo)
-        cardPanel.add(crearPanelProveedores(), "PROVEEDORES");
+        cardPanel.add(crearABMProveedor(), "PROVEEDORES");
         cardPanel.add(crearPanelGenerico("Módulo de Productos"), "PRODUCTOS");
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Compra (OC)"), "OC");
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Pago (OP)"), "OP");
@@ -76,7 +79,7 @@ public class MenuPrincipal extends JFrame {
     }
 
     // PANTALLA DEL MÓDULO DE PROVEEDORES //TODO: Reemplazar por cada C.U: ABM de Proveedores
-    private JPanel crearPanelProveedores() {
+    private JPanel crearABMProveedor() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -103,15 +106,16 @@ public class MenuPrincipal extends JFrame {
         JScrollPane scrollPane = new JScrollPane(tabla);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        // Evento del botón nuevo para abrir el formulario emergente
+        // CREAR PROVEEDOR
         btnNuevo.addActionListener(e -> {
-            view.ProveedorDialog dialog = new view.ProveedorDialog(this);
-            dialog.setVisible(true);
+            VistaAltaProveedor vistaAltaProveedor = new VistaAltaProveedor();
+            vistaAltaProveedor.setVisible(true);
         });
 
         return panel;
     }
 
+    //TODO: reemplazar por cada una de las opciones para cada modulo
     private JPanel crearPanelGenerico(String titulo) {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.add(new JLabel(titulo, SwingConstants.CENTER));
@@ -120,7 +124,18 @@ public class MenuPrincipal extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new MenuPrincipal().setVisible(true);
+
+            JFrame base = new JFrame();
+
+            LoginGUI login = new LoginGUI(base);
+            login.setVisible(true);
+
+            // Evaluar login
+            if (login.isLoginExitoso()) {
+                new MenuPrincipal().setVisible(true);
+            } else {
+                System.exit(0);
+            }
         });
     }
 }
