@@ -1,5 +1,7 @@
 package Farmared.model.user;
 
+import Farmared.utils.GeneradorDeCodigos;
+
 public class Usuario {
     private String legajo;
     private String nombre;
@@ -48,9 +50,8 @@ public class Usuario {
     }
 
     private String generarLegajo() {
-        //legajo = numero random entre 1000 y 9999
-        int numeroRandom = (int) (Math.random() * 9000) + 1000;
-        return String.valueOf(numeroRandom); // Convierte el int a String
+        GeneradorDeCodigos gdc = new GeneradorDeCodigos();
+        return gdc.generarCodigo("Lu", 4);
     }
 
     @Override

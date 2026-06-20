@@ -2,8 +2,6 @@ package Farmared.model.item;
 
 import Farmared.utils.GeneradorDeCodigos;
 
-import java.util.UUID;
-
 public class UnidadDeMedida {
     private String codigoUnidad;
     private String descripcionUnidad;
