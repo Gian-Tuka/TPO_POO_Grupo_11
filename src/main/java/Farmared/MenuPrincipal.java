@@ -49,7 +49,7 @@ public class MenuPrincipal extends JFrame {
 
         // Añadimos las vistas de los módulos (por ahora paneles de ejemplo)
         cardPanel.add(crearPanelProveedores(), "PROVEEDORES");
-        cardPanel.add(crearPanelGenerico("Módulo de Productos"), "PRODUCTOS");
+        cardPanel.add(crearPanelProductos(), "PRODUCTOS");
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Compra (OC)"), "OC");
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Pago (OP)"), "OP");
         cardPanel.add(crearPanelGenerico("Módulo de Comprobantes"), "COMPROBANTES");
@@ -76,7 +76,7 @@ public class MenuPrincipal extends JFrame {
     }
 
     // PANTALLA DEL MÓDULO DE PROVEEDORES //TODO: Reemplazar por cada C.U: ABM de Proveedores
-    private JPanel crearPanelProveedores() {
+        private JPanel crearPanelProveedores() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -111,6 +111,54 @@ public class MenuPrincipal extends JFrame {
 
         return panel;
     }
+
+
+    private JPanel crearPanelProductos() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+       //boton para crear un nuevo producto
+        JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnNuevo = new JButton("Crear Producto");
+        barraAcciones.add(btnNuevo);
+        //boton para crear un nuevo servicio
+        JButton btnNuevoServicio = new JButton("Crear Servicio");
+        barraAcciones.add(btnNuevoServicio);
+        //boton para crear un nueva unidad de medida
+        JButton btnNuevaUnidad = new JButton("Crear Unidad de Medida");
+        barraAcciones.add(btnNuevaUnidad);
+
+        panel.add(barraAcciones, BorderLayout.NORTH);
+
+        String[] columnas = {"Descripción", "Unidad de Medida", "Precio", "IVA", "Rubro"};
+        Object[][] datosSimulados = {
+                {"Amoxicilina 500mg", "Caja", "$1500", "21%", "Medicamentos"},
+                {"Alcohol en Gel", "Litro", "$800", "10.5%", "Higiene"}
+        };
+
+        JTable tabla = new JTable(datosSimulados, columnas);
+        JScrollPane scrollPane = new JScrollPane(tabla);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        btnNuevo.addActionListener(e -> {
+            Farmared.view.ProductoDialog dialog = new Farmared.view.ProductoDialog(this);
+            dialog.setVisible(true);
+        });
+
+        btnNuevoServicio.addActionListener(e -> {
+            Farmared.view.ServicioDialog dialog = new Farmared.view.ServicioDialog(this);
+            dialog.setVisible(true);
+        });
+
+        btnNuevaUnidad.addActionListener(e -> {
+            Farmared.view.UnidadDialog dialog = new Farmared.view.UnidadDialog(this);
+            dialog.setVisible(true);
+        });
+
+        return panel;
+    }
+
+
 
     private JPanel crearPanelGenerico(String titulo) {
         JPanel panel = new JPanel(new GridBagLayout());
