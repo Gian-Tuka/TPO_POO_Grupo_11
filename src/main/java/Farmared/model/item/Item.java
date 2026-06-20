@@ -59,7 +59,7 @@ public abstract class Item {
         } else {
             this.codigo = gdc.generarCodigo("ITM", 5);
         }
-        return "";
+        return codigo;
     }
 
     public void agregarPrecio(PrecioProveedor precio) {
