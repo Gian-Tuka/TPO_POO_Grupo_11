@@ -5,6 +5,7 @@ import Farmared.dto.item.ItemDTO;
 import Farmared.model.item.*;
 import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.rubro.Rubro;
+import Farmared.model.rubro.TipoRubro;
 
 import java.util.ArrayList;
 
@@ -46,9 +47,9 @@ public class ControladorProductosYServicios {
 
         if ("PRODUCTO".equalsIgnoreCase(tipoItem)) {
             // Pasamos una lista vacía de precios al constructor como pide tu modelo
-            nuevoItem = new Producto(descripcion, unidad, new ArrayList<>(), tipoIVA, rubroAsociado);
+            nuevoItem = new Producto(descripcion, unidad, tipoIVA, rubroAsociado);
         } else {
-            nuevoItem = new Servicio(descripcion, unidad, new ArrayList<>(), tipoIVA, rubroAsociado);
+            nuevoItem = new Servicio(descripcion, unidad, tipoIVA, rubroAsociado);
         }
 
         items.add(nuevoItem);

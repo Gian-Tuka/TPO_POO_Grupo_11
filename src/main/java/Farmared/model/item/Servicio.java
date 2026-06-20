@@ -7,8 +7,7 @@ import java.util.ArrayList;
 
 public class Servicio extends Item {
 
-    public Servicio(String descripcionDeItem, UnidadDeMedida unidadMedida,
-                    ArrayList<PrecioProveedor> precioItem, TipoDeIVA tipoDeIVA, Rubro rubro) {
+    public Servicio(String descripcionDeItem, UnidadDeMedida unidadMedida, TipoDeIVA tipoDeIVA, Rubro rubro) {
 
         // Llama al constructor de la clase padre (Item)
         super(descripcionDeItem, unidadMedida, tipoDeIVA, rubro);
