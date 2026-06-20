@@ -5,8 +5,7 @@ import Farmared.dto.item.ItemDTO;
 import Farmared.model.item.*;
 import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.rubro.Rubro;
-import Farmared.model.rubro.TipoRubro;
-
+import Farmared.utils.Validations;
 import java.util.ArrayList;
 
 public class ControladorProductosYServicios {
@@ -33,14 +32,11 @@ public class ControladorProductosYServicios {
 
         Rubro rubroAsociado = ControladorProveedores.getInstance().buscarRubroPorId(idRubro);
 
-        if (rubroAsociado == null) {
-            throw new RuntimeException("Error: El rubro seleccionado no existe.");
-        }
+        Validations v = new Validations();
+        v.requireNonNull(rubroAsociado, "Error: El rubro seleccionado no existe.");
 
         UnidadDeMedida unidad = buscarUnidadModelo(codigoUnidad);
-        if (unidad == null) {
-            throw new RuntimeException("Error: Unidad de medida no válida.");
-        }
+        v.requireNonNull(unidad, "Error: Unidad de medida no válida.");
 
         Item nuevoItem;
         TipoDeIVA tipoIVA = TipoDeIVA.valueOf(iva);

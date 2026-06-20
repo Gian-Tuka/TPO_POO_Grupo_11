@@ -3,7 +3,7 @@ package Farmared.view.rubro;
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.rubro.RubroDTO;
 import Farmared.view.proveedorGUI.VistaAltaProveedor; // Import necesario
-
+import Farmared.utils.Validations;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -59,12 +59,11 @@ public class VistaAltaRubro extends JFrame {
 
     private void registrarRubro() {
         try {
-            String nombre = txtNombre.getText().trim();
+            String nombre = txtNombre.getText();
             String tipo = (String) comboTipo.getSelectedItem();
 
-            if (nombre.isEmpty()) {
-                throw new Exception("El nombre del rubro no puede estar vacío.");
-            }
+            Validations v = new Validations();
+            v.requireNonEmpty(nombre, "El nombre del rubro no puede estar vacío.");
 
             // 1. Creas el DTO y llamas a tu controlador para persistir (Ajusta según tu backend)
             RubroDTO dto = new RubroDTO(null, nombre, tipo);

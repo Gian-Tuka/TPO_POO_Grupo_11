@@ -39,4 +39,59 @@ public class Validations {
         return digitoCalculado == digitoEsperado;
     }
 
+    // Valida si un String es nulo o está vacío
+    public boolean isNullOrEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
+    // Arroja una excepción si un String es nulo o vacío
+    public void requireNonEmpty(String str, String errorMessage) throws Exception {
+        if (isNullOrEmpty(str)) {
+            throw new Exception(errorMessage);
+        }
+    }
+
+    // Verifica si un String puede ser convertido a Float
+    public boolean isFloat(String str) {
+        if (isNullOrEmpty(str)) return false;
+        try {
+            Float.parseFloat(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    // Verifica si un String puede ser convertido a Integer
+    public boolean isInteger(String str) {
+        if (isNullOrEmpty(str)) return false;
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    // Valida un correo electrónico
+    public boolean validEmail(String email) {
+        if (isNullOrEmpty(email)) return false;
+        String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(regex);
+    }
+
+    // Valida un número de teléfono (solo números, puede contener + y -)
+    public boolean validPhone(String phone) {
+        if (isNullOrEmpty(phone)) return false;
+        String regex = "^[+]?[0-9\\-]+$";
+        return phone.matches(regex);
+    }
+
+    // Arroja una excepción si un objeto es nulo
+    public void requireNonNull(Object obj, String errorMessage) {
+        if (obj == null) {
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
 }

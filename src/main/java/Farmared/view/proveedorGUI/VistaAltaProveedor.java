@@ -116,6 +116,17 @@ public class VistaAltaProveedor extends JDialog {
                 throw new Exception("Cuit invalido");
             }
 
+            v.requireNonEmpty(txtRazonSocial.getText(), "La Razón Social es requerida");
+            
+            if (!v.validEmail(txtCorreo.getText())) {
+                throw new Exception("El formato del correo es inválido");
+            }
+            if (!v.validPhone(txtTelefono.getText())) {
+                throw new Exception("El número de teléfono es inválido");
+            }
+            if (!v.isFloat(txtTopeDeuda.getText())) {
+                throw new Exception("El tope de deuda debe ser numérico");
+            }
 
             ProveedorDTO dto = new ProveedorDTO(
                     txtCuit.getText(),
