@@ -9,6 +9,9 @@ import Farmared.model.proveedor.CondicionIVA;
 import Farmared.model.proveedor.Proveedor;
 import Farmared.model.rubro.Rubro;
 import Farmared.model.rubro.TipoRubro;
+import Farmared.model.user.Area;
+import Farmared.model.user.Rol;
+import Farmared.model.user.Usuario;
 import Farmared.utils.Domicilio;
 import Farmared.utils.UtilDate;
 
@@ -25,6 +28,19 @@ public class ControladorProveedores {
     private ControladorProveedores() {
         this.proveedores = new ArrayList<Proveedor>();
         this.rubrosGlobales = new ArrayList<Rubro>();
+
+        // 2. ADENTRO del constructor sí podés usar el .add() sin errores:
+        Domicilio domicilio = new Domicilio("Av. Falsa", "123", "1234", "Springfield", "Argentina");
+        Date miFecha = UtilDate.stringToDate("01/01/2000");
+
+        Proveedor proveedor1 = new Proveedor("30-00000000-1", "Gomez S.A", "Gomesitos", domicilio, "12344321",
+                "gomesitos@gomez.com.ar", CondicionIVA.RESPONSABLE_INSCRIPTO, "888888888", miFecha, 10000000);
+
+        Proveedor proveedor2 = new Proveedor("30-00000000-2", "Zemog S.A", "Random", domicilio, "99988877",
+                "zemog5@gomez.com.ar", CondicionIVA.RESPONSABLE_INSCRIPTO, "888888888", miFecha, 10000000);
+
+        proveedores.add(proveedor1);
+        proveedores.add(proveedor2);
     }
 
     public synchronized static ControladorProveedores getInstance() {
@@ -172,7 +188,13 @@ public class ControladorProveedores {
                 nombresRubros
         );
     }
-
+    public ArrayList<ProveedorDTO> obtenerProveedores () {
+        ArrayList<ProveedorDTO> listaProveedoresDTO = new ArrayList<>();
+        for (Proveedor p : proveedores) {
+            listaProveedoresDTO.add(toDTO(p));
+        }
+        return listaProveedoresDTO;
+    }
     private static RubroDTO toDTORubro(Rubro model) {
         return new RubroDTO(
                 model.getIdRubro(),

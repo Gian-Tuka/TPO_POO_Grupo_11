@@ -1,12 +1,17 @@
 package Farmared;
 
+import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
+import Farmared.dto.proveedor.ProveedorDTO;
+import Farmared.model.proveedor.Proveedor;
 import Farmared.view.LoginGUI;
 import Farmared.view.proveedorGUI.VistaAltaProveedor;
 import Farmared.view.rubro.VistaAltaRubro;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class MenuPrincipal extends JFrame {
 
@@ -81,34 +86,54 @@ public class MenuPrincipal extends JFrame {
 
     // PANTALLA DEL MÓDULO DE PROVEEDORES //TODO: Reemplazar por cada C.U: ABM de Proveedores
     private JPanel crearPanelProveedores() {
+        ControladorProveedores proveedorController = ControladorProveedores.getInstance();
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Barra de acciones superior (CRUD)
         JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnNuevo = new JButton("Crear Proveedor");
-        JButton btnModificar = new JButton("Modificar Proveedor");
-        JButton btnEliminar = new JButton("Eliminar Proveedor");
+        JButton btnNuevoProveedor = new JButton("Crear Proveedor");
+        JButton btnModificarProveedor = new JButton("Modificar Proveedor");
+        JButton btnEliminarProveedor = new JButton("Eliminar Proveedor");
+        JButton btnCrearRubro = new JButton("Crear Rubro");
 
-        barraAcciones.add(btnNuevo);
-        barraAcciones.add(btnModificar);
-        barraAcciones.add(btnEliminar);
+        barraAcciones.add(btnNuevoProveedor);
+        barraAcciones.add(btnModificarProveedor);
+        barraAcciones.add(btnEliminarProveedor);
+        barraAcciones.add(btnCrearRubro);
         panel.add(barraAcciones, BorderLayout.NORTH);
 
         // Tabla de historial (Mocks / Datos simulados)
-        String[] columnas = {"ID", "Nombre/Razón Social", "CUIT", "Teléfono", "Estado"};
-        Object[][] datosSimulados = {
-                {"1", "Proveedor Alfa S.A.", "30-12345678-9", "4555-1234", "Activo"},
-                {"2", "Distribuidora Beta SRL", "30-87654321-9", "4555-5678", "Activo"},
-                {"3", "Logística Gamma", "27-11223344-5", "4555-9012", "Inactivo"}
+
+        String[] columnas = {"CUIT", "Razon social", "Nombre Fantasía", "Teléfono", "Correo", "Condicion de IVA", "Inicio de actividades"};
+        DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         };
 
-        JTable tabla = new JTable(datosSimulados, columnas);
+        ArrayList<ProveedorDTO> listaProveedores = proveedorController.obtenerProveedores();
+
+        for (ProveedorDTO p : listaProveedores) {
+            Object[] fila = {
+                    p.getCuit(),
+                    p.getRazonSocial(),
+                    p.getNombreFantasia(), // Si tu DTO no tiene esto, usá otro dato público
+                    p.getTelefono(),
+                    p.getCorreo(),
+                    p.getCondicionIVA(),
+                    p.getFechaInicioActividades()
+            };
+            modeloTabla.addRow(fila);
+        }
+
+        JTable tabla = new JTable(modeloTabla);
         JScrollPane scrollPane = new JScrollPane(tabla);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         // CREAR PROVEEDOR
-        btnNuevo.addActionListener(e -> {
+        btnNuevoProveedor.addActionListener(e -> {
             VistaAltaProveedor vistaAltaProveedor = new VistaAltaProveedor();
             vistaAltaProveedor.setVisible(true);
         });

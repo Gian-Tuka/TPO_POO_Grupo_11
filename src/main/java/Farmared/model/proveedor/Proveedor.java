@@ -45,6 +45,8 @@ public class Proveedor {
         this.rubroProveedor = new ArrayList<Rubro>();
         this.precioPorItem = new ArrayList<PrecioProveedor>();
         this.cuentaCorriente = new CuentaCorriente(topeDeuda);
+
+
     }
 
     public void asociarRubro(Rubro rubro) {
