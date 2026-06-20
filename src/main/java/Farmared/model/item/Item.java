@@ -10,13 +10,12 @@ import java.util.UUID;
 public abstract class Item {
     protected String codigo;
     protected String descripcionDeItem;
-    protected UnidadDeMedida cualquierCosa;
     protected UnidadDeMedida unidadMedida;
     protected ArrayList<PrecioProveedor> precioItem;
     protected TipoDeIVA tipoDeIVA;
     protected Rubro rubro;
 
-    public Item(String descripcionDeItem, UnidadDeMedida  unidadMedida, TipoDeIVA tipoDeIVA, Rubro rubro, ArrayList<PrecioProveedor> precioItem) {
+    public Item(String descripcionDeItem, UnidadDeMedida  unidadMedida, TipoDeIVA tipoDeIVA, Rubro rubro) {
         this.codigo = generarCod();
         this.descripcionDeItem = descripcionDeItem;
         this.unidadMedida = unidadMedida;
@@ -39,7 +38,7 @@ public abstract class Item {
     }
 
     public ArrayList<PrecioProveedor> getPrecioItem() {
-        return precioItem;
+        return this.precioItem;
     }
 
     public TipoDeIVA getTipoDeIVA() {

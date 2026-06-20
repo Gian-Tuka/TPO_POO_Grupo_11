@@ -7,7 +7,7 @@ public class Usuario {
     private Rol rol;
 
 
-    public Usuario( String nombre, String apellido, Rol rol) {
+    public Usuario(String nombre, String apellido, Rol rol) {
         this.legajo = generarLegajo();
         this.nombre = nombre;
         this.apellido = apellido;
@@ -55,10 +55,10 @@ public class Usuario {
 
     @Override
     public String toString() {
-        return "Usuario{ + nombre = " + nombre +
-                ", apellido = " + apellido +
-                ", rol = " + rol +
-                ", legajo = " + legajo +
+        return "Usuario: \n nombre : " + nombre +
+                ", apellido : " + apellido +
+                ", rol : " + rol +
+                ", legajo : " + legajo +
                 '}';
     }
 }

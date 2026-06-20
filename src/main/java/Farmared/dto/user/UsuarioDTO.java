@@ -8,6 +8,14 @@ public class UsuarioDTO {
     private String rol;
     private String legajo;
 
+    //DTO para generar el alta desde la view (sin legajo)
+    public UsuarioDTO(String nombre, String apellido, String rol) {
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.rol = rol;
+        this.legajo = null;
+    }
+    // DTO para mostrar informacion en la view
     public UsuarioDTO(String legajo, String nombre, String apellido, String rol) {
         this.nombre = nombre;
         this.apellido = apellido;
@@ -49,7 +57,7 @@ public class UsuarioDTO {
 
     @Override
     public String toString() {
-        return "UsuarioDTO{ + nombre = " + nombre +
+        return "UsuarioDTO{ nombre = " + nombre +
                 ", apellido = " + apellido +
                 ", rol = " + rol +
                 ", legajo = " + legajo +

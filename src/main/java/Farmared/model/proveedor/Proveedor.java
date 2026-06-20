@@ -5,7 +5,7 @@ import Farmared.model.impuesto.CertificadoNoRetencion;
 import Farmared.model.impuesto.ImpuestoRetenible;
 import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.rubro.Rubro;
-import Farmared.model.rubro.TipoRubro;
+import Farmared.utils.Domicilio;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,7 +15,7 @@ public class Proveedor {
     private String cuit;
     private String razonSocial;
     private String nombreFantasia;
-    private String domicilioComercial; //DEBERIA SER UNA CLASE DOMICILIO CREO Y CREAR UN DTO DE ESTO
+    private Domicilio domicilioComercial;
     private String telefono;
     private String correo;
     private CondicionIVA condicionIVA;
@@ -28,7 +28,7 @@ public class Proveedor {
     private ArrayList<PrecioProveedor> precioPorItem;
 
 
-    public Proveedor(String cuit, String razonSocial, String nombreFantasia, String domicilioComercial,
+    public Proveedor(String cuit, String razonSocial, String nombreFantasia, Domicilio domicilioComercial,
                      String telefono, String correo, CondicionIVA condicionIVA, String nroIngBru, Date fechaInicioActividades, float topeDeuda) {
         this.cuit = cuit;
         this.razonSocial = razonSocial;
@@ -58,11 +58,61 @@ public class Proveedor {
     }
 
 
+    public String getCuit() {
+        return cuit;
+    }
 
-    public String getCuit() { return cuit; }
-    public String getRazonSocial() { return razonSocial; }
-    public ArrayList<Rubro> getRubroProveedor() { return rubroProveedor; }
-    public ArrayList<PrecioProveedor> getPrecioPorItem() { return precioPorItem; }
+    public String getRazonSocial() {
+        return razonSocial;
+    }
+
+    public String getNombreFantasia() {
+        return nombreFantasia;
+    }
+
+    public Domicilio getDomicilioComercial() {
+        return domicilioComercial;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public CondicionIVA getCondicionIVA() {
+        return condicionIVA;
+    }
+
+    public String getNroIngBru() {
+        return nroIngBru;
+    }
+
+    public ArrayList<ImpuestoRetenible> getImpuestos() {
+        return impuestos;
+    }
+
+    public Date getFechaInicioActividades() {
+        return fechaInicioActividades;
+    }
+
+    public ArrayList<CertificadoNoRetencion> getCertificadosNoRet() {
+        return certificadosNoRet;
+    }
+
+    public ArrayList<Rubro> getRubroProveedor() {
+        return rubroProveedor;
+    }
+
+    public CuentaCorriente getCuentaCorriente() {
+        return cuentaCorriente;
+    }
+
+    public ArrayList<PrecioProveedor> getPrecioPorItem() {
+        return precioPorItem;
+    }
 }
 
 

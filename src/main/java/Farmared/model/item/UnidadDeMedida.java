@@ -22,4 +22,8 @@ public class UnidadDeMedida {
     public TipoDeUnidad getTipoDeUnidad() {
         return tipoDeUnidad;
     }
+
+    public String getDescripcionUnidad() {
+        return descripcionUnidad;
+    }
 }

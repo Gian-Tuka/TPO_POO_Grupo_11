@@ -26,22 +26,30 @@ public class ControladorUsuariosYSeguridad {
         return controller;
     }
 
+    public UsuarioDTO altaUsuario(UsuarioDTO dto) {
+        Usuario existente = buscarUsuario(dto.getLegajo());
+        if (existente != null) {
+            throw new IllegalArgumentException("Ya existe un usuario con ese legajo");
+        }
+        Usuario nuevo = toModel(dto);
+        usuarios.add(nuevo);
+        return toDTO(nuevo);
+    }
 
     public UsuarioDTO obtenerUsuarioActual(String legajo) {
-
         Usuario usuario = buscarUsuario(legajo);
         if (usuario == null) {
             throw new UsuarioNoEncontradoException(legajo);
         }
         this.usuarioActual = usuario;
-
-        return toDto(usuario);
+        return toDTO(usuario);
     }
 
     private Usuario buscarUsuario(String legajo) {
 
         for (int i = 0; i < usuarios.size(); i++) {
             if (usuarios.get(i).getLegajo().equals(legajo)) {
+                System.out.println("Usuario encontrado: " + usuarios.get(i).getNombre());
                 return usuarios.get(i);
             }
         }
@@ -58,7 +66,7 @@ public class ControladorUsuariosYSeguridad {
     }
 
 
-    private static UsuarioDTO toDto(Usuario model){
+    private static UsuarioDTO toDTO(Usuario model){
         return new UsuarioDTO(
                 model.getLegajo(),
                 model.getNombre(),

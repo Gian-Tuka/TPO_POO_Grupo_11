@@ -11,7 +11,7 @@ public class Servicio extends Item {
                     ArrayList<PrecioProveedor> precioItem, TipoDeIVA tipoDeIVA, Rubro rubro) {
 
         // Llama al constructor de la clase padre (Item)
-        super(descripcionDeItem, unidadMedida, tipoDeIVA, rubro, precioItem);
+        super(descripcionDeItem, unidadMedida, tipoDeIVA, rubro);
 
     }
 }
