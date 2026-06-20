@@ -1,5 +1,7 @@
 package Farmared.model.rubro;
 
+import Farmared.utils.GeneradorDeCodigos;
+
 import java.util.UUID;
 
 public class Rubro {
@@ -14,7 +16,8 @@ public class Rubro {
     }
 
     private String generateIDRubro() {
-        return UUID.randomUUID().toString();
+        GeneradorDeCodigos gdc = new GeneradorDeCodigos();
+        return gdc.generarCodigo("RBR", 5);
     }
 
     public String getIdRubro() { return idRubro; }
