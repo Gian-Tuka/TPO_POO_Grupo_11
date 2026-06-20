@@ -53,9 +53,9 @@ public class MenuPrincipal extends JFrame {
 
         // Añadimos las vistas de los módulos (por ahora paneles de ejemplo)
         cardPanel.add(crearPanelProveedores(), "PROVEEDORES");
-        cardPanel.add(crearPanelGenerico("Módulo de Productos"), "PRODUCTOS");
+        cardPanel.add(crearPanelProductos(), "PRODUCTOS");
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Compra (OC)"), "OC");
-        cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Pago (OP)"), "OP");
+        cardPanel.add(crearPanelOrdenesPago(), "OP");
         cardPanel.add(crearPanelGenerico("Módulo de Comprobantes"), "COMPROBANTES");
         cardPanel.add(crearPanelGenerico("Módulo de Seguridad"), "SEGURIDAD");
 
@@ -115,6 +115,79 @@ public class MenuPrincipal extends JFrame {
 
         return panel;
     }
+
+    private JPanel crearPanelProductos() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnNuevo = new JButton("Crear Producto");
+        barraAcciones.add(btnNuevo);
+
+        JButton btnNuevoServicio = new JButton("Crear Servicio");
+        barraAcciones.add(btnNuevoServicio);
+
+        JButton btnNuevaUnidad = new JButton("Crear Unidad de Medida");
+        barraAcciones.add(btnNuevaUnidad);
+
+        panel.add(barraAcciones, BorderLayout.NORTH);
+
+        String[] columnas = {"Descripción", "Unidad de Medida", "Precio", "IVA", "Rubro"};
+        Object[][] datosSimulados = {
+                {"Amoxicilina 500mg", "Caja", "$1500", "21%", "Medicamentos"},
+                {"Alcohol en Gel", "Litro", "$800", "10.5%", "Higiene"}
+        };
+
+        JTable tabla = new JTable(datosSimulados, columnas);
+        JScrollPane scrollPane = new JScrollPane(tabla);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        btnNuevo.addActionListener(e -> {
+            Farmared.view.ProductoDialog dialog = new Farmared.view.ProductoDialog(this);
+            dialog.setVisible(true);
+        });
+
+        btnNuevoServicio.addActionListener(e -> {
+            Farmared.view.ServicioDialog dialog = new Farmared.view.ServicioDialog(this);
+            dialog.setVisible(true);
+        });
+
+        btnNuevaUnidad.addActionListener(e -> {
+            Farmared.view.UnidadDialog dialog = new Farmared.view.UnidadDialog(this);
+            dialog.setVisible(true);
+        });
+
+        return panel;
+    }
+
+    private JPanel crearPanelOrdenesPago() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnNuevo = new JButton("Emitir Orden de Pago");
+        barraAcciones.add(btnNuevo);
+        panel.add(barraAcciones, BorderLayout.NORTH);
+
+        String[] columnas = {"N° OP", "Proveedor", "Forma de Pago", "Monto Total"};
+        Object[][] datosSimulados = {
+                {"OP-001", "Proveedor Alfa S.A.", "Transferencia", "$15000"},
+                {"OP-002", "Distribuidora Beta SRL", "Cheque", "$8500"}
+        };
+
+        JTable tabla = new JTable(datosSimulados, columnas);
+        JScrollPane scrollPane = new JScrollPane(tabla);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        btnNuevo.addActionListener(e -> {
+            Farmared.view.OrdenDePagoDialog dialog = new Farmared.view.OrdenDePagoDialog(this);
+            dialog.setVisible(true);
+        });
+
+        return panel;
+    }
+
+
 
     //TODO: reemplazar por cada una de las opciones para cada modulo
     private JPanel crearPanelGenerico(String titulo) {
