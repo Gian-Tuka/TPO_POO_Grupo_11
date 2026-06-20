@@ -6,7 +6,12 @@ import Farmared.dto.proveedor.ProveedorDTO;
 import Farmared.model.proveedor.Proveedor;
 import Farmared.view.LoginGUI;
 import Farmared.view.proveedorGUI.VistaAltaProveedor;
+import Farmared.view.proveedorGUI.VistaModificarProveedor;
+import Farmared.view.proveedorGUI.VistaEliminarProveedor;
 import Farmared.view.rubro.VistaAltaRubro;
+
+import Farmared.controller.proveedores.ControladorProveedores;
+import Farmared.dto.proveedor.ProveedorDTO;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -17,6 +22,7 @@ public class MenuPrincipal extends JFrame {
 
     private JPanel cardPanel; // Contenedor dinámico
     private CardLayout cardLayout;
+    private DefaultTableModel modeloTablaProveedores;
 
     public MenuPrincipal() {
         ControladorUsuariosYSeguridad authController = ControladorUsuariosYSeguridad.getInstance();
@@ -103,42 +109,61 @@ public class MenuPrincipal extends JFrame {
         barraAcciones.add(btnCrearRubro);
         panel.add(barraAcciones, BorderLayout.NORTH);
 
-        // Tabla de historial (Mocks / Datos simulados)
-
-        String[] columnas = {"CUIT", "Razon social", "Nombre Fantasía", "Teléfono", "Correo", "Condicion de IVA", "Inicio de actividades"};
-        DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0) {
+        // Tabla de historial dinámica
+        String[] columnas = {"Razón Social", "CUIT", "Teléfono", "Condición IVA"};
+        modeloTablaProveedores = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false;
+                return false; // Hacer que la tabla no sea editable directamente
             }
         };
 
-        ArrayList<ProveedorDTO> listaProveedores = proveedorController.obtenerProveedores();
-
-        for (ProveedorDTO p : listaProveedores) {
-            Object[] fila = {
-                    p.getCuit(),
-                    p.getRazonSocial(),
-                    p.getNombreFantasia(), // Si tu DTO no tiene esto, usá otro dato público
-                    p.getTelefono(),
-                    p.getCorreo(),
-                    p.getCondicionIVA(),
-                    p.getFechaInicioActividades()
-            };
-            modeloTabla.addRow(fila);
-        }
-
-        JTable tabla = new JTable(modeloTabla);
+        JTable tabla = new JTable(modeloTablaProveedores);
         JScrollPane scrollPane = new JScrollPane(tabla);
         panel.add(scrollPane, BorderLayout.CENTER);
+
+        // Cargar los datos la primera vez
+        actualizarTablaProveedores();
 
         // CREAR PROVEEDOR
         btnNuevoProveedor.addActionListener(e -> {
             VistaAltaProveedor vistaAltaProveedor = new VistaAltaProveedor();
+            vistaAltaProveedor.setModal(true);
             vistaAltaProveedor.setVisible(true);
+            actualizarTablaProveedores();
+        });
+
+        // MODIFICAR PROVEEDOR
+        btnModificarProveedor.addActionListener(e -> {
+            VistaModificarProveedor vistaModificarProveedor = new VistaModificarProveedor();
+            vistaModificarProveedor.setModal(true);
+            vistaModificarProveedor.setVisible(true);
+            actualizarTablaProveedores();
+        });
+
+        // ELIMINAR PROVEEDOR
+        btnEliminarProveedor.addActionListener(e -> {
+            VistaEliminarProveedor vistaEliminarProveedor = new VistaEliminarProveedor();
+            vistaEliminarProveedor.setModal(true);
+            vistaEliminarProveedor.setVisible(true);
+            actualizarTablaProveedores();
         });
 
         return panel;
+    }
+
+    private void actualizarTablaProveedores() {
+        modeloTablaProveedores.setRowCount(0); // Limpiar la tabla
+        ArrayList<ProveedorDTO> listaProveedores = ControladorProveedores.getInstance().obtenerProveedoresDTO();
+        for (ProveedorDTO p : listaProveedores) {
+            Object[] fila = {
+                    p.getRazonSocial(),
+                    p.getCuit(),
+                    p.getTelefono(),
+                    p.getCondicionIVA()
+            };
+            modeloTablaProveedores.addRow(fila);
+        }
     }
 
     //TODO: reemplazar por cada una de las opciones para cada modulo
