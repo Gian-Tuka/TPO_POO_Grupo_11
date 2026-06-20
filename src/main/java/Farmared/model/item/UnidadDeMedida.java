@@ -1,5 +1,7 @@
 package Farmared.model.item;
 
+import Farmared.utils.GeneradorDeCodigos;
+
 import java.util.UUID;
 
 public class UnidadDeMedida {
@@ -9,7 +11,7 @@ public class UnidadDeMedida {
 
 
     public UnidadDeMedida(String descripcionUnidad, TipoDeUnidad tipoDeUnidad) {
-        this.codigoUnidad = UUID.randomUUID().toString();
+        this.codigoUnidad = generarCod();
         this.descripcionUnidad = descripcionUnidad;
         this.tipoDeUnidad = tipoDeUnidad;
     }
@@ -25,5 +27,11 @@ public class UnidadDeMedida {
 
     public String getDescripcionUnidad() {
         return descripcionUnidad;
+    }
+
+    private String generarCod() {
+        GeneradorDeCodigos gdc = new GeneradorDeCodigos();
+
+        return gdc.generarCodigo("UDM", 5);
     }
 }

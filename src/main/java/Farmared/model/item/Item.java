@@ -2,10 +2,9 @@ package Farmared.model.item;
 
 import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.rubro.Rubro;
+import Farmared.utils.GeneradorDeCodigos;
 import java.util.ArrayList;
 import java.util.UUID;
-
-
 
 public abstract class Item {
     protected String codigo;
@@ -50,7 +49,16 @@ public abstract class Item {
     }
 
     private String generarCod() {
-        return UUID.randomUUID().toString();
+
+        GeneradorDeCodigos gdc = new GeneradorDeCodigos();
+
+        if (this instanceof Producto) {
+            this.codigo = gdc.generarCodigo("PDT", 5);
+        } else if (this instanceof Servicio) {
+            this.codigo = gdc.generarCodigo("SVC", 5);
+        } else {
+            this.codigo = gdc.generarCodigo("ITM", 5);
+        }
     }
 
     public void agregarPrecio(PrecioProveedor precio) {
