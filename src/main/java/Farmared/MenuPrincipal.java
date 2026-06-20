@@ -2,6 +2,7 @@ package Farmared;
 
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
 import Farmared.view.LoginGUI;
+import Farmared.view.itemGUI.GUIItem;
 import Farmared.view.proveedorGUI.GUIProveedor;
 import Farmared.view.proveedorGUI.VistaAltaProveedor;
 import Farmared.view.proveedorGUI.VistaModificarProveedor;
@@ -61,7 +62,7 @@ public class MenuPrincipal extends JFrame {
         cardPanel = new JPanel(cardLayout);
 
         cardPanel.add(new GUIProveedor(), "PROVEEDORES");
-        cardPanel.add(crearPanelProductos(), "PRODUCTOS");
+        cardPanel.add(new GUIItem(this), "PRODUCTOS");
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Compra (OC)"), "OC");
         cardPanel.add(crearPanelOrdenesPago(), "OP");
         cardPanel.add(crearPanelGenerico("Módulo de Comprobantes"), "COMPROBANTES");
@@ -84,82 +85,6 @@ public class MenuPrincipal extends JFrame {
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         return btn;
-    }
-
-    private JPanel crearPanelProductos() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnNuevo = new JButton("Crear Producto");
-        barraAcciones.add(btnNuevo);
-
-        JButton btnNuevoServicio = new JButton("Crear Servicio");
-        barraAcciones.add(btnNuevoServicio);
-
-        JButton btnNuevaUnidad = new JButton("Crear Unidad de Medida");
-        barraAcciones.add(btnNuevaUnidad);
-
-        panel.add(barraAcciones, BorderLayout.NORTH);
-
-        JTabbedPane tabbedPane = new JTabbedPane();
-
-        // Tabla Productos
-        String[] columnasProductos = {"Código", "Descripción", "Unidad", "IVA", "Rubro", "Precio Vigente"};
-        modeloTablaProductos = new DefaultTableModel(columnasProductos, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
-        };
-        JTable tablaProductos = new JTable(modeloTablaProductos);
-        tabbedPane.addTab("Productos", new JScrollPane(tablaProductos));
-
-        // Tabla Servicios
-        String[] columnasServicios = {"Código", "Descripción", "Unidad", "IVA", "Rubro", "Precio Vigente"};
-        modeloTablaServicios = new DefaultTableModel(columnasServicios, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
-        };
-        JTable tablaServicios = new JTable(modeloTablaServicios);
-        tabbedPane.addTab("Servicios", new JScrollPane(tablaServicios));
-
-        panel.add(tabbedPane, BorderLayout.CENTER);
-
-        btnNuevo.addActionListener(e -> {
-            Farmared.view.ProductoDialog dialog = new Farmared.view.ProductoDialog(this);
-            dialog.setVisible(true);
-            actualizarTablasProductos();
-        });
-
-        btnNuevoServicio.addActionListener(e -> {
-            Farmared.view.ServicioDialog dialog = new Farmared.view.ServicioDialog(this);
-            dialog.setVisible(true);
-            actualizarTablasProductos();
-        });
-
-        btnNuevaUnidad.addActionListener(e -> {
-            Farmared.view.UnidadDialog dialog = new Farmared.view.UnidadDialog(this);
-            dialog.setVisible(true);
-        });
-
-        actualizarTablasProductos();
-
-        return panel;
-    }
-
-    private void actualizarTablasProductos() {
-        modeloTablaProductos.setRowCount(0);
-        ArrayList<ItemDTO> productos = ControladorProductosYServicios.getInstance().obtenerSoloProductos();
-        for (ItemDTO p : productos) {
-            Object[] fila = { p.getCodigo(), p.getDescripcionDeItem(), p.getUnidadMedida(), p.getTipoDeIVA(), p.getRubro(), p.getPrecioItem() };
-            modeloTablaProductos.addRow(fila);
-        }
-
-        modeloTablaServicios.setRowCount(0);
-        ArrayList<ItemDTO> servicios = ControladorProductosYServicios.getInstance().obtenerSoloServicios();
-        for (ItemDTO s : servicios) {
-            Object[] fila = { s.getCodigo(), s.getDescripcionDeItem(), s.getUnidadMedida(), s.getTipoDeIVA(), s.getRubro(), s.getPrecioItem() };
-            modeloTablaServicios.addRow(fila);
-        }
     }
 
     private JPanel crearPanelOrdenesPago() {

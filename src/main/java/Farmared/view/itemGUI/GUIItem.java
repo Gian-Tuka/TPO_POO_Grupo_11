@@ -1,4 +1,98 @@
 package Farmared.view.itemGUI;
 
-public class GUIItem {
+import Farmared.controller.item.ControladorProductosYServicios;
+import Farmared.dto.item.ItemDTO;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.ArrayList;
+
+public class GUIItem extends JPanel {
+
+    private DefaultTableModel modeloTablaProductos;
+    private DefaultTableModel modeloTablaServicios;
+    private JFrame ventanaPrincipal;
+
+    public GUIItem(JFrame ventanaPrincipal) {
+        this.ventanaPrincipal = ventanaPrincipal;
+
+        this.setLayout(new BorderLayout(10, 10));
+        this.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnNuevo = new JButton("Crear Producto");
+        barraAcciones.add(btnNuevo);
+
+        JButton btnNuevoServicio = new JButton("Crear Servicio");
+        barraAcciones.add(btnNuevoServicio);
+
+        JButton btnNuevaUnidad = new JButton("Crear Unidad de Medida");
+        barraAcciones.add(btnNuevaUnidad);
+
+        this.add(barraAcciones, BorderLayout.NORTH);
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        // Tabla Productos
+        String[] columnasProductos = {"Código", "Descripción", "Unidad", "IVA", "Rubro", "Precio Vigente"};
+        modeloTablaProductos = new DefaultTableModel(columnasProductos, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        JTable tablaProductos = new JTable(modeloTablaProductos);
+        tabbedPane.addTab("Productos", new JScrollPane(tablaProductos));
+
+        // Tabla Servicios
+        String[] columnasServicios = {"Código", "Descripción", "Unidad", "IVA", "Rubro", "Precio Vigente"};
+        modeloTablaServicios = new DefaultTableModel(columnasServicios, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+
+        JTable tablaServicios = new JTable(modeloTablaServicios);
+        tabbedPane.addTab("Servicios", new JScrollPane(tablaServicios));
+
+        this.add(tabbedPane, BorderLayout.CENTER);
+
+        // Listeners optimizados para refrescar solo lo que corresponde
+        btnNuevo.addActionListener(e -> {
+            Farmared.view.ProductoDialog dialog = new Farmared.view.ProductoDialog(ventanaPrincipal);
+            dialog.setVisible(true);
+            actualizarTablaProductos(); // <--- Solo productos
+        });
+
+        btnNuevoServicio.addActionListener(e -> {
+            Farmared.view.ServicioDialog dialog = new Farmared.view.ServicioDialog(ventanaPrincipal);
+            dialog.setVisible(true);
+            actualizarTablaServicios(); // <--- Solo servicios
+        });
+
+        btnNuevaUnidad.addActionListener(e -> {
+            Farmared.view.UnidadDialog dialog = new Farmared.view.UnidadDialog(ventanaPrincipal);
+            dialog.setVisible(true);
+            // Si la unidad afecta visualmente a ambos, podrías llamar a ambos métodos acá
+        });
+
+        actualizarTablaProductos();
+        actualizarTablaServicios();
+    }
+
+    public void actualizarTablaProductos() {
+        modeloTablaProductos.setRowCount(0);
+        ArrayList<ItemDTO> productos = ControladorProductosYServicios.getInstance().obtenerSoloProductos();
+        for (ItemDTO p : productos) {
+            Object[] fila = { p.getCodigo(), p.getDescripcionDeItem(), p.getUnidadMedida(), p.getTipoDeIVA(), p.getRubro(), p.getPrecioItem() };
+            modeloTablaProductos.addRow(fila);
+        }
+    }
+
+    public void actualizarTablaServicios() {
+        modeloTablaServicios.setRowCount(0);
+        ArrayList<ItemDTO> servicios = ControladorProductosYServicios.getInstance().obtenerSoloServicios();
+        for (ItemDTO s : servicios) {
+            Object[] fila = { s.getCodigo(), s.getDescripcionDeItem(), s.getUnidadMedida(), s.getTipoDeIVA(), s.getRubro(), s.getPrecioItem() };
+            modeloTablaServicios.addRow(fila);
+        }
+    }
 }

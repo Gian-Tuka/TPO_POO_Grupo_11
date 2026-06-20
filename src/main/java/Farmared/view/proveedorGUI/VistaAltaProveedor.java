@@ -48,28 +48,16 @@ public class VistaAltaProveedor extends JDialog {
         // Combo Box para IVA (Estos Strings deben coincidir con tu Enum CondicionIVA)
         String[] ivas = {"RESPONSABLE_INSCRIPTO", "MONOTRIBUTISTA", "EXENTO"};
         comboCondicionIVA = new JComboBox<>(ivas);
-
-//        ControladorProveedores ctrlProv = ControladorProveedores.getInstance();
-//
-//        ArrayList<String> nombresRubros = ctrlProv.obtenerNombresRubros();
-//        String[] rubrosArray = nombresRubros.toArray(new String[0]);
-//
-//        listaRubros = new JList<>(rubrosArray);
-//        listaRubros.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-//        JScrollPane scrollRubros = new JScrollPane(listaRubros);
-        // MODIFICADO: Inicializamos el modelo dinámico vacío
         modeloRubros = new DefaultListModel<>();
 
-        // MODIFICADO: Vinculamos la JList al modelo dinámico
+        //Vinculamos la JList al modelo dinámico
         listaRubros = new JList<>(modeloRubros);
         listaRubros.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         JScrollPane scrollRubros = new JScrollPane(listaRubros);
 
-        // Se llama al método que carga los datos por primera vez
+
         actualizarListaRubros();
 
-
-        // Agregamos al panel (Etiqueta + Campo)
         panelFormulario.add(new JLabel("CUIT:")); panelFormulario.add(txtCuit);
         panelFormulario.add(new JLabel("Razón Social:")); panelFormulario.add(txtRazonSocial);
         panelFormulario.add(new JLabel("Nombre Fantasía:")); panelFormulario.add(txtFantasia);
@@ -93,11 +81,11 @@ public class VistaAltaProveedor extends JDialog {
         panelBoton.add(btnRegistrar);
         add(panelBoton, BorderLayout.SOUTH);
 
-        // ACÁ ESTÁ LA MAGIA DEL MVC: El evento del botón
+
         btnRegistrar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                registrarProveedorEnBackend();
+                registrarProveedor();
             }
         });
     }
@@ -115,7 +103,7 @@ public class VistaAltaProveedor extends JDialog {
         }
     }
 
-    private void registrarProveedorEnBackend() {
+    private void registrarProveedor() {
         try {
 
             Validations v = new Validations();
@@ -123,7 +111,7 @@ public class VistaAltaProveedor extends JDialog {
             // Obtenemos los rubros seleccionados en la JList
             ArrayList<String> rubrosSeleccionados = new ArrayList<>(listaRubros.getSelectedValuesList());
 
-
+            //TODO: validaciones!!!
             if (!v.validCuit(txtCuit.getText())) {
                 throw new Exception("Cuit invalido");
             }
@@ -150,7 +138,6 @@ public class VistaAltaProveedor extends JDialog {
             ProveedorDTO resultado = ControladorProveedores.getInstance().registrarProveedor(dto);
 
 
-            // 3. Muestra confirmación con el DTO devuelto
             JOptionPane.showMessageDialog(this,
                     "Proveedor registrado: " + resultado.getRazonSocial(),
                     "Alta Exitosa",
@@ -159,11 +146,5 @@ public class VistaAltaProveedor extends JDialog {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error al registrar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new VistaAltaProveedor().setVisible(true);
-        });
     }
 }
