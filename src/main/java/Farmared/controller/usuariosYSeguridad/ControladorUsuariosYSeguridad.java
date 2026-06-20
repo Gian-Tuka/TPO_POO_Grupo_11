@@ -2,6 +2,7 @@ package Farmared.controller.usuariosYSeguridad;
 
 import Farmared.dto.user.UsuarioDTO;
 import Farmared.exception.UsuarioNoEncontradoException;
+import Farmared.model.user.Area;
 import Farmared.model.user.Rol;
 import Farmared.model.user.Usuario;
 
@@ -27,10 +28,6 @@ public class ControladorUsuariosYSeguridad {
     }
 
     public UsuarioDTO altaUsuario(UsuarioDTO dto) {
-        Usuario existente = buscarUsuario(dto.getLegajo());
-        if (existente != null) {
-            throw new IllegalArgumentException("Ya existe un usuario con ese legajo");
-        }
         Usuario nuevo = toModel(dto);
         usuarios.add(nuevo);
         return toDTO(nuevo);
@@ -61,7 +58,9 @@ public class ControladorUsuariosYSeguridad {
         return new Usuario(
                 dto.getNombre(),
                 dto.getApellido(),
-                Rol.valueOf(dto.getRol())
+                Rol.valueOf(dto.getRol()),
+                Area.valueOf(dto.getArea()),
+                "1415"
         );
     }
 
@@ -71,7 +70,8 @@ public class ControladorUsuariosYSeguridad {
                 model.getLegajo(),
                 model.getNombre(),
                 model.getApellido(),
-                model.getRol().name()
+                model.getRol().name(),
+                model.getArea().name()
         );
     }
 }
