@@ -17,6 +17,7 @@ public class ControladorProductosYServicios {
     private ControladorProductosYServicios() {
         this.items = new ArrayList<Item>();
         this.unidadesDeMedida = new ArrayList<UnidadDeMedida>();
+        cargarUnidadesSimuladas();
     }
 
     public synchronized static ControladorProductosYServicios getInstance() {
@@ -90,14 +91,39 @@ public class ControladorProductosYServicios {
         return null;
     }
 
-    private UnidadDeMedida buscarUnidadModelo(String codigo) {
-
+    public UnidadDeMedida buscarUnidadModelo(String codigo) {
         for  (int  i = 0; i < unidadesDeMedida.size(); i++) {
             if(unidadesDeMedida.get(i).getCodigoUnidad().equals(codigo)) {
                 return unidadesDeMedida.get(i);
             }
         }
         return null;
+    }
+
+    public ArrayList<String> obtenerDescripcionesUnidades() {
+        ArrayList<String> descs = new ArrayList<>();
+        for (UnidadDeMedida u : unidadesDeMedida) {
+            descs.add(u.getDescripcionUnidad() + " (" + u.getCodigoUnidad() + ")");
+        }
+        return descs;
+    }
+
+    public String obtenerCodigoUnidadPorDescripcionCombo(String comboItem) {
+        if (comboItem == null) return null;
+        for (UnidadDeMedida u : unidadesDeMedida) {
+            if ((u.getDescripcionUnidad() + " (" + u.getCodigoUnidad() + ")").equals(comboItem)) {
+                return u.getCodigoUnidad();
+            }
+        }
+        return null;
+    }
+
+    private void cargarUnidadesSimuladas() {
+        unidadesDeMedida.add(new UnidadDeMedida("Kilogramo", TipoDeUnidad.PESO));
+        unidadesDeMedida.add(new UnidadDeMedida("Litro", TipoDeUnidad.VOLUMEN));
+        unidadesDeMedida.add(new UnidadDeMedida("Unidad", TipoDeUnidad.UNIDAD));
+        unidadesDeMedida.add(new UnidadDeMedida("Hora", TipoDeUnidad.TIEMPO));
+        unidadesDeMedida.add(new UnidadDeMedida("Mensual", TipoDeUnidad.TIEMPO));
     }
 
 

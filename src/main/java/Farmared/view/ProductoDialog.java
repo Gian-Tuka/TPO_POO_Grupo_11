@@ -1,7 +1,14 @@
 package Farmared.view;
 
+import Farmared.controller.item.ControladorProductosYServicios;
+import Farmared.controller.proveedores.ControladorProveedores;
+import Farmared.dto.item.ItemDTO;
+import Farmared.dto.rubro.RubroDTO;
+import Farmared.model.item.TipoDeIVA;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class ProductoDialog extends JDialog {
 
@@ -25,8 +32,8 @@ public class ProductoDialog extends JDialog {
         formPanel.add(txtDescripcion);
 
         formPanel.add(new JLabel("Unidad de Medida:"));
-        String[] unidadesMock = {"-- Seleccionar --", "Kilogramo", "Litro", "Unidad"};
-        comboUnidadMedida = new JComboBox<>(unidadesMock);
+        ArrayList<String> unidadesDesc = ControladorProductosYServicios.getInstance().obtenerDescripcionesUnidades();
+        comboUnidadMedida = new JComboBox<>(unidadesDesc.toArray(new String[0]));
         formPanel.add(comboUnidadMedida);
 
         formPanel.add(new JLabel("Precio:"));
@@ -34,13 +41,17 @@ public class ProductoDialog extends JDialog {
         formPanel.add(txtPrecio);
 
         formPanel.add(new JLabel("Tipo de IVA:"));
-        String[] ivaMock = {"-- Seleccionar --", "21%", "10.5%", "Exento"};
-        comboTipoIVA = new JComboBox<>(ivaMock);
+        TipoDeIVA[] valoresIVA = TipoDeIVA.values();
+        String[] ivaNames = new String[valoresIVA.length];
+        for (int i = 0; i < valoresIVA.length; i++) {
+            ivaNames[i] = valoresIVA[i].name();
+        }
+        comboTipoIVA = new JComboBox<>(ivaNames);
         formPanel.add(comboTipoIVA);
 
         formPanel.add(new JLabel("Rubro:"));
-        String[] rubrosMock = {"-- Seleccionar --", "Medicamentos", "Higiene", "Cosmética"};
-        comboRubro = new JComboBox<>(rubrosMock);
+        ArrayList<String> rubros = ControladorProveedores.getInstance().obtenerNombresRubros();
+        comboRubro = new JComboBox<>(rubros.toArray(new String[0]));
         formPanel.add(comboRubro);
 
         add(formPanel, BorderLayout.CENTER);
@@ -55,8 +66,31 @@ public class ProductoDialog extends JDialog {
 
         btnCancelar.addActionListener(e -> dispose());
         btnGuardar.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "¡Producto guardado!");
-            dispose();
+            try {
+                String desc = txtDescripcion.getText();
+                String comboUnidad = (String) comboUnidadMedida.getSelectedItem();
+                String codigoUnidad = ControladorProductosYServicios.getInstance().obtenerCodigoUnidadPorDescripcionCombo(comboUnidad);
+                String iva = (String) comboTipoIVA.getSelectedItem();
+                String nombreRubro = (String) comboRubro.getSelectedItem();
+                
+                // We need to pass the ID of the Rubro to registrarItem
+                String idRubro = null;
+                for (RubroDTO r : ControladorProveedores.getInstance().obtenerRubrosDTO()) {
+                    if (r.getNombre().equals(nombreRubro)) {
+                        idRubro = r.getId();
+                        break;
+                    }
+                }
+
+                if (idRubro == null) throw new Exception("Rubro inválido");
+
+                ControladorProductosYServicios.getInstance().registrarItem(desc, codigoUnidad, iva, idRubro, "PRODUCTO");
+                
+                JOptionPane.showMessageDialog(this, "¡Producto guardado!");
+                dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error al guardar el producto: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 

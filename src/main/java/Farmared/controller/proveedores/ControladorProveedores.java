@@ -108,6 +108,13 @@ public class ControladorProveedores {
     }
 
     private void cargarDatosSimulados() {
+        if (this.rubrosGlobales.isEmpty()) {
+            this.rubrosGlobales.add(new Rubro("Medicamentos", TipoRubro.BIENES));
+            this.rubrosGlobales.add(new Rubro("Higiene", TipoRubro.BIENES));
+            this.rubrosGlobales.add(new Rubro("Limpieza", TipoRubro.SERVICIOS));
+            this.rubrosGlobales.add(new Rubro("Mantenimiento", TipoRubro.SERVICIOS));
+        }
+
         if (this.proveedores.isEmpty()) {
             try {
                 ProveedorDTO dto1 = new ProveedorDTO("30-12345678-1", "Proveedor Alfa S.A.", "Alfa", "Calle Falsa", "123", "1000", "CABA", "Argentina", "4555-1234", "alfa@test.com", "RESPONSABLE_INSCRIPTO", "12345", "", 100000f, new ArrayList<>());
