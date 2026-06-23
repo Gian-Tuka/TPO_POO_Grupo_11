@@ -104,7 +104,6 @@ public class ControladorUsuariosYSeguridad {
 
         for (int i = 0; i < usuarios.size(); i++) {
             if (usuarios.get(i).getLegajo().equals(legajo)) {
-                System.out.println("Usuario encontrado: " + usuarios.get(i).getNombre());
                 return usuarios.get(i);
             }
         }
