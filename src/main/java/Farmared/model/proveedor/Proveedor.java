@@ -60,6 +60,21 @@ public class Proveedor {
         this.precioPorItem.add(precio);
     }
 
+    // Sección 1.5 — Métodos de encapsulamiento faltantes
+    public void agregarImpuesto(ImpuestoRetenible impuesto) {
+        if (!impuestos.contains(impuesto)) {
+            impuestos.add(impuesto);
+        }
+    }
+
+    public void agregarCertificado(CertificadoNoRetencion certificado) {
+        certificadosNoRet.add(certificado);
+    }
+
+    public void eliminarPrecioItem(PrecioProveedor pp) {
+        precioPorItem.remove(pp);
+    }
+
 
     public String getCuit() {
         return cuit;

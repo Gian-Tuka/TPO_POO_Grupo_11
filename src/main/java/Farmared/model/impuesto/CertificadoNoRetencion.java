@@ -18,9 +18,9 @@ public class CertificadoNoRetencion {
         this.proveedor = proveedor;
     }
 
-    // Sección 1.3 — Visibilidad cambiada de private a public
-    public Boolean validarVigencia(Date fechaHoy){
-        return null;
+    // Sección 1.4 — Bug 10: Lógica real implementada (antes retornaba null)
+    public boolean validarVigencia(Date fechaHoy) {
+        return !fechaHoy.before(fechaInicio) && !fechaHoy.after(fechaVencimiento);
     }
 
     // Getters faltantes (sección 1.3)

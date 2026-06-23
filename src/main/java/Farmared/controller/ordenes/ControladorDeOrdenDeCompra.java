@@ -79,6 +79,16 @@ public class ControladorDeOrdenDeCompra {
         return false;
     }
 
+    public boolean tieneOrdenesActivas(String cuit) {
+        for (OrdenDeCompra oc : ordenesDeCompra) {
+            if (oc.getProveedor().getCuit().equals(cuit)
+                && (oc.getEstado() == EstadoOC.APROBADA || oc.getEstado() == EstadoOC.PENDIENTE_AUTORIZACION)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<OrdenDeCompra> getOrdenesDeCompra() {
         return ordenesDeCompra;
     }

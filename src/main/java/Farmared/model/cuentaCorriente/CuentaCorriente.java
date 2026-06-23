@@ -1,6 +1,9 @@
 package Farmared.model.cuentaCorriente;
 
 import Farmared.model.comprobante.Comprobante;
+import Farmared.model.comprobante.Factura;
+import Farmared.model.comprobante.NotaCredito;
+import Farmared.model.comprobante.NotaDebito;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,11 +13,6 @@ public class CuentaCorriente {
     private ArrayList<Comprobante> comprobantes;
     private float topeDeuda;
     private float deudaActual;
-
-
-
-
-
 
     public CuentaCorriente(float topeDeuda) {
         this.topeDeuda = topeDeuda;
@@ -31,13 +29,17 @@ public class CuentaCorriente {
     }
 
     public Float calcularDeuda() {
-
         return this.deudaActual;
     }
 
-    public void agregarComprobante(Comprobante comprobante) {
-        this.comprobantes.add(comprobante);
-
+    // Bug 3 — Refactorización: actualiza deudaActual según el tipo de comprobante
+    public void agregarComprobante(Comprobante c) {
+        comprobantes.add(c);
+        if (c instanceof Factura || c instanceof NotaDebito) {
+            deudaActual += c.getTotal();
+        } else if (c instanceof NotaCredito) {
+            deudaActual -= c.getTotal();
+        }
     }
 
     // Bug 11 — Setter faltante para topeDeuda
