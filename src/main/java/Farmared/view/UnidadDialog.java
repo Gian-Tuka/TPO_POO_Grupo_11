@@ -1,34 +1,29 @@
 package Farmared.view;
 
+import Farmared.model.item.TipoDeUnidad;
 import javax.swing.*;
 import java.awt.*;
 
 public class UnidadDialog extends JDialog {
 
-    private JTextField txtCodigoUnidad;
     private JTextField txtDescripcionUnidad;
-    private JComboBox<String> comboTipoUnidad;
+    private JComboBox<TipoDeUnidad> comboTipoUnidad;
 
     public UnidadDialog(JFrame parent) {
         super(parent, "Registrar Unidad de Medida", true);
-        setSize(400, 250);
+        setSize(400, 220);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10, 10));
 
-        JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        JPanel formPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        formPanel.add(new JLabel("Código de Unidad:"));
-        txtCodigoUnidad = new JTextField();
-        formPanel.add(txtCodigoUnidad);
 
         formPanel.add(new JLabel("Descripción:"));
         txtDescripcionUnidad = new JTextField();
         formPanel.add(txtDescripcionUnidad);
 
         formPanel.add(new JLabel("Tipo de Unidad:"));
-        String[] tiposMock = {"-- Seleccionar --", "Peso", "Volumen", "Cantidad"};
-        comboTipoUnidad = new JComboBox<>(tiposMock);
+        comboTipoUnidad = new JComboBox<>(TipoDeUnidad.values());
         formPanel.add(comboTipoUnidad);
 
         add(formPanel, BorderLayout.CENTER);
@@ -43,12 +38,11 @@ public class UnidadDialog extends JDialog {
 
         btnCancelar.addActionListener(e -> dispose());
         btnGuardar.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "¡Unidad de Medida guardada!");
+            JOptionPane.showMessageDialog(this, "¡Unidad de Medida guardada (Simulado)!");
             dispose();
         });
     }
 
-    public String getCodigoUnidad() { return txtCodigoUnidad.getText(); }
     public String getDescripcionUnidad() { return txtDescripcionUnidad.getText(); }
-    public String getTipoUnidad() { return (String) comboTipoUnidad.getSelectedItem(); }
+    public TipoDeUnidad getTipoUnidad() { return (TipoDeUnidad) comboTipoUnidad.getSelectedItem(); }
 }
