@@ -1,13 +1,12 @@
 package Farmared;
 
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
+import Farmared.dto.rubro.RubroDTO;
+import Farmared.model.item.TipoDeUnidad;
+import Farmared.model.item.UnidadDeMedida;
 import Farmared.view.LoginGUI;
 import Farmared.view.itemGUI.GUIItem;
 import Farmared.view.proveedorGUI.GUIProveedor;
-import Farmared.view.proveedorGUI.VistaAltaProveedor;
-import Farmared.view.proveedorGUI.VistaModificarProveedor;
-import Farmared.view.proveedorGUI.VistaEliminarProveedor;
-import Farmared.view.rubro.VistaAltaRubro;
 
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.proveedor.ProveedorDTO;
@@ -29,6 +28,7 @@ public class MenuPrincipal extends JFrame {
     private DefaultTableModel modeloTablaServicios;
 
     public MenuPrincipal() {
+        cargarDatosSimulados();
         ControladorUsuariosYSeguridad authController = ControladorUsuariosYSeguridad.getInstance();
         setTitle("Sistema de Gestión Integrado");
         setSize(1024, 720);
@@ -119,6 +119,40 @@ public class MenuPrincipal extends JFrame {
         panel.add(new JLabel(titulo, SwingConstants.CENTER));
         return panel;
     }
+
+
+
+
+    private void cargarDatosSimulados() {
+        ControladorProveedores cProv = ControladorProveedores.getInstance();
+        ControladorProductosYServicios cProdYServ = ControladorProductosYServicios.getInstance();
+
+        if (cProv.obtenerProveedoresDTO().isEmpty() && cProv.obtenerRubrosDTO().isEmpty()) {
+            try {
+                ProveedorDTO dto1 = new ProveedorDTO("30-12345678-1", "Proveedor Alfa S.A.", "Alfa", "Calle Falsa", "123", "1000", "CABA", "Argentina", "4555-1234", "alfa@test.com", "RESPONSABLE_INSCRIPTO", "12345", "", 100000f, new ArrayList<>());
+                ProveedorDTO dto2 = new ProveedorDTO("30-87654321-0", "Distribuidora Beta SRL", "Beta", "Avenida Siempreviva", "742", "1000", "CABA", "Argentina", "4555-5678", "beta@test.com", "MONOTRIBUTISTA", "54321", "", 50000f, new ArrayList<>());
+                ProveedorDTO dto3 = new ProveedorDTO("27-11223344-5", "Logística Gamma", "Gamma", "Ruta 9", "Km 50", "1629", "Pilar", "Argentina", "4555-9012", "gamma@test.com", "EXENTO", "11223", "", 25000f, new ArrayList<>());
+
+                cProv.registrarProveedor(dto1);
+                cProv.registrarProveedor(dto2);
+                cProv.registrarProveedor(dto3);
+
+                cProv.altaRubro(new RubroDTO("Medicamentos", "BIENES"));
+                cProv.altaRubro(new RubroDTO("Limpieza", "SERVICIOS"));
+                cProv.altaRubro(new RubroDTO("Seguridad", "SERVICIOS"));
+
+            } catch (Exception e) {
+                System.out.println("Error general de simulación: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+
+
+
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

@@ -2,11 +2,17 @@ package Farmared.controller.item;
 
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.item.ItemDTO;
+import Farmared.dto.proveedor.ProveedorDTO;
+import Farmared.exception.InvalidItemException;
+import Farmared.exception.RubroNotExistException;
+import Farmared.exception.UDMException;
 import Farmared.model.item.*;
 import Farmared.model.precio.PrecioProveedor;
+import Farmared.model.proveedor.Proveedor;
 import Farmared.model.rubro.Rubro;
 import Farmared.utils.Validations;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ControladorProductosYServicios {
     private static ControladorProductosYServicios instance = null;
@@ -28,25 +34,10 @@ public class ControladorProductosYServicios {
     }
 
     // Alta de Item desde la Vista
-    public ItemDTO registrarItem(String descripcion, String codigoUnidad, String iva, String idRubro, String tipoItem) {
+    public ItemDTO registrarItem(ItemDTO dto) throws Exception {
 
-        Rubro rubroAsociado = ControladorProveedores.getInstance().buscarRubroPorId(idRubro);
-
-        Validations v = new Validations();
-        v.requireNonNull(rubroAsociado, "Error: El rubro seleccionado no existe.");
-
-        UnidadDeMedida unidad = buscarUnidadModelo(codigoUnidad);
-        v.requireNonNull(unidad, "Error: Unidad de medida no válida.");
-
-        Item nuevoItem;
-        TipoDeIVA tipoIVA = TipoDeIVA.valueOf(iva);
-
-        if ("PRODUCTO".equalsIgnoreCase(tipoItem)) {
-            // Pasamos una lista vacía de precios al constructor como pide tu modelo
-            nuevoItem = new Producto(descripcion, unidad, tipoIVA, rubroAsociado);
-        } else {
-            nuevoItem = new Servicio(descripcion, unidad, tipoIVA, rubroAsociado);
-        }
+        //TODO: Validaciones
+        Item nuevoItem = toModel(dto);
 
         items.add(nuevoItem);
         return toDTO(nuevoItem);
@@ -76,7 +67,7 @@ public class ControladorProductosYServicios {
         return itemDTOS;
     }
 
-    // Método de comunicación clave utilizado por el Controlador de Proveedores
+    // comunicación para el Controlador de Proveedores
     public Item buscarItemModeloPorCodigo(String codigo) {
 
         for (int  i = 0; i < items.size(); i++) {
@@ -85,6 +76,12 @@ public class ControladorProductosYServicios {
             }
         }
         return null;
+    }
+
+    public void registrarUnidadDeMedida(UnidadDeMedida udm) {
+        if (udm != null) {
+            this.unidadesDeMedida.add(udm);
+        }
     }
 
     private UnidadDeMedida buscarUnidadModelo(String codigo) {
@@ -96,7 +93,6 @@ public class ControladorProductosYServicios {
         }
         return null;
     }
-
 
     private ItemDTO toDTO(Item item) {
         String precioVigente = "Sin precio";
@@ -111,10 +107,39 @@ public class ControladorProductosYServicios {
                 item.getCodigo(),
                 item.getDescripcionDeItem(),
                 item.getUnidadMedida().getDescripcionUnidad(),
+                item.getUnidadMedida().getCodigoUnidad(),
                 item.getTipoDeIVA().name(),
                 item.getRubro().getNombreRubro(),
                 precioVigente
         );
+    }
+
+    public Item toModel(ItemDTO dto) throws Exception {
+        Validations v = new Validations();
+
+
+        UnidadDeMedida udm = buscarUnidadModelo(dto.getTipoUDM());
+        if (udm == null) {
+            throw new UDMException("Unidad de medida seleccionada no existe.");
+        }
+
+        TipoDeIVA enumIVA = TipoDeIVA.valueOf(dto.getTipoDeIVA());
+
+        Rubro rubroModelo = ControladorProveedores.getInstance().buscarRubroPorId(dto.getRubro());
+        if (rubroModelo == null) {
+            throw new RubroNotExistException("El Rubro seleccionado no existe.");
+        }
+
+        Item itemResultado;
+        if ("PRODUCTO".equalsIgnoreCase(dto.getTipoItem())) {
+            itemResultado = new Producto(dto.getDescripcionDeItem(), udm, enumIVA, rubroModelo);
+        } else if ("SERVICIO".equalsIgnoreCase(dto.getTipoItem())) {
+            itemResultado = new Servicio(dto.getDescripcionDeItem(), udm, enumIVA, rubroModelo);
+        } else {
+            throw new InvalidItemException("Tipo de ítem inválido.");
+        }
+
+        return itemResultado;
     }
 
 }

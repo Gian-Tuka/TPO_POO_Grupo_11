@@ -11,6 +11,11 @@ public class RubroDTO {
         this.tipoRubro = tipoRubro;
     }
 
+    public RubroDTO(String nombre, String tipoRubro) {
+        this.nombre = nombre;
+        this.tipoRubro = tipoRubro;
+    }
+
 
     public String getId() {
         return id;

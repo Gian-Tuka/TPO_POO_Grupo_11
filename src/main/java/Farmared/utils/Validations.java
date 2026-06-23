@@ -1,5 +1,7 @@
 package Farmared.utils;
 
+import Farmared.exception.NotNullException;
+
 public class Validations {
 
 
@@ -90,7 +92,7 @@ public class Validations {
     // Arroja una excepción si un objeto es nulo
     public void requireNonNull(Object obj, String errorMessage) {
         if (obj == null) {
-            throw new RuntimeException(errorMessage);
+            throw new NotNullException(errorMessage);
         }
     }
 

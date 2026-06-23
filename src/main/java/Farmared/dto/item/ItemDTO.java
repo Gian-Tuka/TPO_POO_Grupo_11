@@ -3,20 +3,56 @@ package Farmared.dto.item;
 public class ItemDTO {
     private String codigo;
     private String descripcionDeItem;
-    private String unidadMedida;
+    private String descripcionUnidadMedida;
+    private String tipoUDM;
     private String tipoDeIVA;
     private String rubro;
     private String precioVigente;
+    private String tipoItem;
 
-    public ItemDTO(String codigo, String descripcionDeItem, String unidadMedida, String tipoDeIVA, String rubro, String precioVigente) {
+    public ItemDTO(String codigo, String descripcionDeItem, String descripcionUDM, String tipoUDM, String tipoDeIVA, String rubro, String precioVigente) {
         this.codigo = codigo;
         this.descripcionDeItem = descripcionDeItem;
-        this.unidadMedida = unidadMedida;
+        this.descripcionUnidadMedida = descripcionUDM;
+        this.tipoUDM = tipoUDM;
         this.tipoDeIVA = tipoDeIVA;
         this.rubro = rubro;
         this.precioVigente = precioVigente;
     }
 
+    public ItemDTO(String descripcionDeItem, String descripcionUDM, String tipoUDM, String tipoDeIVA, String rubro) {
+        this.descripcionDeItem = descripcionDeItem;
+        this.descripcionUnidadMedida = descripcionUDM;
+        this.tipoUDM = tipoUDM;
+        this.tipoDeIVA = tipoDeIVA;
+        this.rubro = rubro;
+        this.precioVigente = precioVigente;
+    }
+
+    public String getTipoItem() {
+        return tipoItem;
+    }
+
+    public void setTipoItem(String tipoItem) {}
+
+    public String getPrecioVigente() {
+        return precioVigente;
+    }
+
+    public void setPrecioVigente(String precioVigente) {
+        this.precioVigente = precioVigente;
+    }
+
+    public String getDescripcionUnidadMedida() {
+        return descripcionUnidadMedida;
+    }
+    public String getTipoUDM() {
+        return tipoUDM;
+    }
+
+    public void setTipoUDM(String tipoUDM) {
+        this.tipoUDM = tipoUDM;
+    }
     public String getCodigo() {
         return codigo;
     }
@@ -31,14 +67,6 @@ public class ItemDTO {
 
     public void setDescripcionDeItem(String descripcionDeItem) {
         this.descripcionDeItem = descripcionDeItem;
-    }
-
-    public String getUnidadMedida() {
-        return unidadMedida;
-    }
-
-    public void setUnidadMedida(String unidadMedida) {
-        this.unidadMedida = unidadMedida;
     }
 
     public String getPrecioItem() {

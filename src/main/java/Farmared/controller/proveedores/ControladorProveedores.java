@@ -9,6 +9,7 @@ import Farmared.model.proveedor.CondicionIVA;
 import Farmared.model.proveedor.Proveedor;
 import Farmared.model.rubro.Rubro;
 import Farmared.model.rubro.TipoRubro;
+import Farmared.model.user.Area;
 import Farmared.utils.Domicilio;
 import Farmared.utils.UtilDate;
 import Farmared.utils.Validations;
@@ -25,7 +26,6 @@ public class ControladorProveedores {
     private ControladorProveedores() {
         this.proveedores = new ArrayList<Proveedor>();
         this.rubrosGlobales = new ArrayList<Rubro>();
-        cargarDatosSimulados();
     }
 
     public synchronized static ControladorProveedores getInstance() {
@@ -42,7 +42,7 @@ public class ControladorProveedores {
             throw new Exception("Ya existe un proveedor registrado con el CUIT: " + dto.getCuit());
         }
 
-        Proveedor nuevo = toModel(dto);
+        Proveedor nuevo = toModelProveedor(dto);
 
         // vinculamos los Rubros que el usuario puso en la GUI
         for (String nombreRubro : dto.getIdsRubros()) {
@@ -53,7 +53,7 @@ public class ControladorProveedores {
         }
 
         this.proveedores.add(nuevo);
-        return toDTO(nuevo);
+        return toDTOProveedor(nuevo);
     }
 
     public ProveedorDTO modificarProveedor(ProveedorDTO dto) throws Exception {
@@ -80,7 +80,7 @@ public class ControladorProveedores {
         }
         proveedor.setRubroProveedor(nuevosRubros);
 
-        return toDTO(proveedor);
+        return toDTOProveedor(proveedor);
     }
 
     public void eliminarProveedor(String cuit) throws Exception {
@@ -94,7 +94,7 @@ public class ControladorProveedores {
     public ProveedorDTO buscarProveedorDTOPorCuit(String cuit) {
         Proveedor proveedor = buscarProveedorPorCuit(cuit);
         if (proveedor != null) {
-            return toDTO(proveedor);
+            return toDTOProveedor(proveedor);
         }
         return null;
     }
@@ -102,25 +102,9 @@ public class ControladorProveedores {
     public ArrayList<ProveedorDTO> obtenerProveedoresDTO() {
         ArrayList<ProveedorDTO> lista = new ArrayList<>();
         for (Proveedor p : proveedores) {
-            lista.add(toDTO(p));
+            lista.add(toDTOProveedor(p));
         }
         return lista;
-    }
-
-    private void cargarDatosSimulados() {
-        if (this.proveedores.isEmpty()) {
-            try {
-                ProveedorDTO dto1 = new ProveedorDTO("30-12345678-1", "Proveedor Alfa S.A.", "Alfa", "Calle Falsa", "123", "1000", "CABA", "Argentina", "4555-1234", "alfa@test.com", "RESPONSABLE_INSCRIPTO", "12345", "", 100000f, new ArrayList<>());
-                ProveedorDTO dto2 = new ProveedorDTO("30-87654321-0", "Distribuidora Beta SRL", "Beta", "Avenida Siempreviva", "742", "1000", "CABA", "Argentina", "4555-5678", "beta@test.com", "MONOTRIBUTISTA", "54321", "", 50000f, new ArrayList<>());
-                ProveedorDTO dto3 = new ProveedorDTO("27-11223344-5", "Logística Gamma", "Gamma", "Ruta 9", "Km 50", "1629", "Pilar", "Argentina", "4555-9012", "gamma@test.com", "EXENTO", "11223", "", 25000f, new ArrayList<>());
-                
-                this.proveedores.add(toModel(dto1));
-                this.proveedores.add(toModel(dto2));
-                this.proveedores.add(toModel(dto3));
-            } catch (Exception e) {
-                // Ignore errors during simulation loading
-            }
-        }
     }
 
     // REGISTRO DE PRECIO: Doble amarre usando consistencia bidireccional
@@ -213,7 +197,7 @@ public class ControladorProveedores {
         return nombresRubros;
     }
 
-    private static ProveedorDTO toDTO(Proveedor model) {
+    private static ProveedorDTO toDTOProveedor(Proveedor model) {
         ArrayList<String> nombresRubros = new ArrayList<>();
         for (Rubro r : model.getRubroProveedor()) {
             nombresRubros.add(r.getNombreRubro());
@@ -249,7 +233,14 @@ public class ControladorProveedores {
                 model.getTipoRubro().name()
         );
     }
-    private static Proveedor toModel (ProveedorDTO dto) {
+
+    private static Rubro toModelRubro(RubroDTO dto) {
+        return new Rubro(
+                dto.getNombre(),
+                TipoRubro.valueOf(dto.getTipoRubro())
+        );
+    }
+    private static Proveedor toModelProveedor(ProveedorDTO dto) {
         Domicilio domicilio = new Domicilio(dto.getCalle(),
                 dto.getNumeroDpto(),
                 dto.getCodigoPostal(),
