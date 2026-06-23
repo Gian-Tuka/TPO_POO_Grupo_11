@@ -98,4 +98,7 @@ public class OrdenDeCompra {
     public List<DetalleOC> getDetalles() {
         return detalles;
     }
+
+    // Getter faltante para fechaEmision (sección 1.1)
+    public Date getFechaEmision() { return this.fechaEmision; }
 }

@@ -12,12 +12,19 @@ public class RangoDeRetencion {
         this.retencion = retencion;
     }
 
-    private Boolean estaEnRango(float monto){
+    // Sección 1.3 — Visibilidad cambiada de private a public
+    public Boolean estaEnRango(float monto){
         return null;
     }
 
-    private Float calcularRetencion(float monto){
+    // Sección 1.3 — Visibilidad cambiada de private a public
+    public Float calcularRetencion(float monto){
         return null;
     }
+
+    // Getters faltantes (sección 1.3)
+    public float getMinimo() { return minimo; }
+    public float getMaximo() { return maximo; }
+    public float getRetencion() { return retencion; }
 }
 

@@ -4,6 +4,7 @@ import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.rubro.Rubro;
 import Farmared.utils.GeneradorDeCodigos;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public abstract class Item {
     protected String codigo;
@@ -63,5 +64,25 @@ public abstract class Item {
 
     public void agregarPrecio(PrecioProveedor precio) {
         this.precioItem.add(precio);
+    }
+
+    // Bug 35 — Setters faltantes para atributos mutables
+    public void setDescripcionDeItem(String descripcionDeItem) { this.descripcionDeItem = descripcionDeItem; }
+    public void setUnidadMedida(UnidadDeMedida unidadMedida) { this.unidadMedida = unidadMedida; }
+    public void setTipoDeIVA(TipoDeIVA tipoDeIVA) { this.tipoDeIVA = tipoDeIVA; }
+    public void setRubro(Rubro rubro) { this.rubro = rubro; }
+
+    // Bug 12 — equals/hashCode basado en codigo (clave natural única)
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Item)) return false;
+        Item item = (Item) o;
+        return Objects.equals(codigo, item.codigo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(codigo);
     }
 }

@@ -32,4 +32,8 @@ public class UnidadDeMedida {
 
         return gdc.generarCodigo("UDM", 5);
     }
+
+    // Setters faltantes (sección 1.1)
+    public void setDescripcionUnidad(String descripcionUnidad) { this.descripcionUnidad = descripcionUnidad; }
+    public void setTipoDeUnidad(TipoDeUnidad tipoDeUnidad) { this.tipoDeUnidad = tipoDeUnidad; }
 }

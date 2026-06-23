@@ -18,7 +18,14 @@ public class CertificadoNoRetencion {
         this.proveedor = proveedor;
     }
 
-    private Boolean validarVigencia(Date fechaHoy){
+    // Sección 1.3 — Visibilidad cambiada de private a public
+    public Boolean validarVigencia(Date fechaHoy){
         return null;
     }
+
+    // Getters faltantes (sección 1.3)
+    public ImpuestoRetenible getImpuesto() { return impuesto; }
+    public Date getFechaInicio() { return fechaInicio; }
+    public Date getFechaVencimiento() { return fechaVencimiento; }
+    public Proveedor getProveedor() { return proveedor; }
 }
