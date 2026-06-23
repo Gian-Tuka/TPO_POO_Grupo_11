@@ -18,7 +18,7 @@ public class VistaEliminarUsuario extends JDialog {
 
     public VistaEliminarUsuario() {
         setTitle("Farmared - Eliminar Usuario");
-        setSize(400, 350);
+        setSize(450, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 

@@ -20,7 +20,7 @@ public class VistaCambiarPassword extends JDialog {
 
     public VistaCambiarPassword() {
         setTitle("Farmared - Cambiar Contraseña");
-        setSize(400, 300);
+        setSize(450, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
