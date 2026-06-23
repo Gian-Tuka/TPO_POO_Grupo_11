@@ -7,8 +7,11 @@ import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.rubro.Rubro;
 import Farmared.utils.Domicilio;
 
+import Farmared.utils.Validations;
+
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 public class Proveedor {
 
@@ -55,6 +58,21 @@ public class Proveedor {
 
     public void agregarPrecioItem(PrecioProveedor precio) {
         this.precioPorItem.add(precio);
+    }
+
+    // Sección 1.5 — Métodos de encapsulamiento faltantes
+    public void agregarImpuesto(ImpuestoRetenible impuesto) {
+        if (!impuestos.contains(impuesto)) {
+            impuestos.add(impuesto);
+        }
+    }
+
+    public void agregarCertificado(CertificadoNoRetencion certificado) {
+        certificadosNoRet.add(certificado);
+    }
+
+    public void eliminarPrecioItem(PrecioProveedor pp) {
+        precioPorItem.remove(pp);
     }
 
 
@@ -144,6 +162,33 @@ public class Proveedor {
 
     public void setRubroProveedor(ArrayList<Rubro> rubroProveedor) {
         this.rubroProveedor = rubroProveedor;
+    }
+
+    // Bug 22 — Setter faltante para fechaInicioActividades
+    public void setFechaInicioActividades(Date fechaInicioActividades) {
+        this.fechaInicioActividades = fechaInicioActividades;
+    }
+
+    // Setter faltante para CUIT con re-validación
+    public void setCuit(String cuit) {
+        Validations validations = new Validations();
+        if (validations.isNullOrEmpty(cuit)) throw new IllegalArgumentException("CUIT no puede estar vacío");
+        if (!validations.validCuit(cuit)) throw new IllegalArgumentException("CUIT inválido");
+        this.cuit = cuit;
+    }
+
+    // Bug 33 — equals/hashCode basado en CUIT (clave natural única)
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Proveedor that = (Proveedor) o;
+        return Objects.equals(cuit, that.cuit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cuit);
     }
 }
 

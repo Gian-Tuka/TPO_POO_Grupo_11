@@ -1,8 +1,11 @@
 package Farmared.controller.proveedores;
 
 import Farmared.controller.item.ControladorProductosYServicios;
+import Farmared.controller.ordenes.ControladorDeOrdenDeCompra;
 import Farmared.dto.proveedor.ProveedorDTO;
 import Farmared.dto.rubro.RubroDTO;
+import Farmared.exception.FarmaredException;
+import Farmared.exception.ProveedorNoEncontradoException;
 import Farmared.model.item.Item;
 import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.proveedor.CondicionIVA;
@@ -39,7 +42,7 @@ public class ControladorProveedores {
     public ProveedorDTO registrarProveedor(ProveedorDTO dto) throws Exception {
 
         if (buscarProveedorPorCuit(dto.getCuit()) != null) {
-            throw new Exception("Ya existe un proveedor registrado con el CUIT: " + dto.getCuit());
+            throw new FarmaredException("Ya existe un proveedor registrado con el CUIT: " + dto.getCuit());
         }
 
         Proveedor nuevo = toModelProveedor(dto);
@@ -48,7 +51,7 @@ public class ControladorProveedores {
         for (String nombreRubro : dto.getIdsRubros()) {
             Rubro r = buscarRubroPorNombre(nombreRubro);
             if (r != null) {
-                nuevo.getRubroProveedor().add(r);
+                nuevo.asociarRubro(r); // Bug 34 fix: usar método encapsulado
             }
         }
 
@@ -56,10 +59,11 @@ public class ControladorProveedores {
         return toDTOProveedor(nuevo);
     }
 
-    public ProveedorDTO modificarProveedor(ProveedorDTO dto) throws Exception {
+    // Bug 1 — modificarProveedor() ahora escribe el tope de deuda con setTopeDeuda()
+    public ProveedorDTO modificarProveedor(ProveedorDTO dto) {
         Proveedor proveedor = buscarProveedorPorCuit(dto.getCuit());
         if (proveedor == null) {
-            throw new Exception("No existe un proveedor registrado con el CUIT: " + dto.getCuit());
+            throw new ProveedorNoEncontradoException(dto.getCuit());
         }
 
         proveedor.setRazonSocial(dto.getRazonSocial());
@@ -69,7 +73,7 @@ public class ControladorProveedores {
         proveedor.setCorreo(dto.getCorreo());
         proveedor.setCondicionIVA(CondicionIVA.valueOf(dto.getCondicionIVA()));
         proveedor.setNroIngBru(dto.getNroIngBru());
-        proveedor.getCuentaCorriente().getTopeDeuda();
+        proveedor.getCuentaCorriente().setTopeDeuda(dto.getTopeDeuda()); // Bug 1 fix
 
         ArrayList<Rubro> nuevosRubros = new ArrayList<>();
         for (String nombreRubro : dto.getIdsRubros()) {
@@ -83,12 +87,30 @@ public class ControladorProveedores {
         return toDTOProveedor(proveedor);
     }
 
-    public void eliminarProveedor(String cuit) throws Exception {
-        Proveedor proveedor = buscarProveedorPorCuit(cuit);
-        if (proveedor == null) {
-            throw new Exception("No existe un proveedor registrado con el CUIT: " + cuit);
+    // Bug 39 — eliminarProveedor() verifica referencias activas antes de eliminar
+    public void eliminarProveedor(String cuit) {
+        Proveedor prov = buscarProveedorPorCuit(cuit);
+        if (prov == null) {
+            throw new ProveedorNoEncontradoException(cuit);
         }
-        this.proveedores.remove(proveedor);
+
+        // Verificar OC activas
+        ControladorDeOrdenDeCompra ctrlOC = ControladorDeOrdenDeCompra.getInstance();
+        boolean tieneOCActivas = ctrlOC.tieneOrdenesActivas(cuit);
+        if (tieneOCActivas) {
+            throw new FarmaredException("No se puede eliminar: el proveedor tiene OC activas");
+        }
+
+        // Verificar deuda pendiente
+        if (prov.getCuentaCorriente().getDeudaActual() > 0) {
+            throw new FarmaredException("No se puede eliminar: el proveedor tiene deuda pendiente");
+        }
+
+        // Limpiar precios asociados
+        for (PrecioProveedor pp : new ArrayList<>(prov.getPrecioPorItem())) {
+            pp.getItem().eliminarPrecio(pp);
+        }
+        proveedores.remove(prov);
     }
 
     public ProveedorDTO buscarProveedorDTOPorCuit(String cuit) {
@@ -99,6 +121,11 @@ public class ControladorProveedores {
         return null;
     }
 
+    // Método público para uso inter-controlador
+    public Proveedor buscarProveedorModelo(String cuit) {
+        return buscarProveedorPorCuit(cuit);
+    }
+
     public ArrayList<ProveedorDTO> obtenerProveedoresDTO() {
         ArrayList<ProveedorDTO> lista = new ArrayList<>();
         for (Proveedor p : proveedores) {
@@ -107,7 +134,23 @@ public class ControladorProveedores {
         return lista;
     }
 
-    // REGISTRO DE PRECIO: Doble amarre usando consistencia bidireccional
+    private void cargarDatosSimulados() {
+        if (this.proveedores.isEmpty()) {
+            try {
+                ProveedorDTO dto1 = new ProveedorDTO("30-12345678-1", "Proveedor Alfa S.A.", "Alfa", "Calle Falsa", "123", "1000", "CABA", "Argentina", "4555-1234", "alfa@test.com", "RESPONSABLE_INSCRIPTO", "12345", "", 100000f, new ArrayList<>());
+                ProveedorDTO dto2 = new ProveedorDTO("30-87654321-0", "Distribuidora Beta SRL", "Beta", "Avenida Siempreviva", "742", "1000", "CABA", "Argentina", "4555-5678", "beta@test.com", "MONOTRIBUTISTA", "54321", "", 50000f, new ArrayList<>());
+                ProveedorDTO dto3 = new ProveedorDTO("27-11223344-5", "Logística Gamma", "Gamma", "Ruta 9", "Km 50", "1629", "Pilar", "Argentina", "4555-9012", "gamma@test.com", "EXENTO", "11223", "", 25000f, new ArrayList<>());
+                
+                this.proveedores.add(toModelProveedor(dto1));
+                this.proveedores.add(toModelProveedor(dto2));
+                this.proveedores.add(toModelProveedor(dto3));
+            } catch (Exception e) {
+                // Ignore errors during simulation loading
+            }
+        }
+    }
+
+    // Bug 38 — registrarPrecioProveedor() usa métodos encapsulados
     public void registrarPrecioProveedor(String cuitProveedor, String codigoItem, float valorPrecio) {
         Proveedor prov = buscarProveedorPorCuit(cuitProveedor);
 
@@ -121,9 +164,9 @@ public class ControladorProveedores {
         // Construimos la clase intermedia de asociación
         PrecioProveedor nuevoPrecio = new PrecioProveedor(item, prov, valorPrecio, new Date());
 
-        // Ejecutamos la consistencia bidireccional en las estructuras ArrayList
-        prov.getPrecioPorItem().add(nuevoPrecio);
-        item.getPrecioItem().add(nuevoPrecio);
+        // Bug 38 fix: Usar métodos encapsulados en vez de acceso directo a listas internas
+        prov.agregarPrecioItem(nuevoPrecio);
+        item.agregarPrecio(nuevoPrecio);
     }
 
     // Búsqueda interna para uso del Controlador de Items
@@ -203,9 +246,8 @@ public class ControladorProveedores {
             nombresRubros.add(r.getNombreRubro());
         }
 
-        //parseo a string la fecha inicio actividades
-        UtilDate utilDate = new UtilDate();
-        String fechaStr = utilDate.parseDate(model.getFechaInicioActividades());
+        // Anti-patrón fix: llamada estática directa
+        String fechaStr = UtilDate.parseDate(model.getFechaInicioActividades());
 
         return new ProveedorDTO(
                 model.getCuit(),
@@ -248,6 +290,14 @@ public class ControladorProveedores {
                 dto.getPais()
         );
 
+        // Bug 13 fix: parsear la fecha del DTO en vez de usar new Date()
+        Date fechaInicioActividades;
+        if (dto.getFechaInicioActividades() != null && !dto.getFechaInicioActividades().isEmpty()) {
+            fechaInicioActividades = UtilDate.toDate(dto.getFechaInicioActividades());
+        } else {
+            fechaInicioActividades = new Date(); // Fallback para datos simulados sin fecha
+        }
+
         return new Proveedor(
                 dto.getCuit(),
                 dto.getRazonSocial(),
@@ -257,7 +307,7 @@ public class ControladorProveedores {
                 dto.getCorreo(),
                 CondicionIVA.valueOf(dto.getCondicionIVA()),
                 dto.getNroIngBru(),
-                new Date(),
+                fechaInicioActividades,
                 dto.getTopeDeuda()
         );
 

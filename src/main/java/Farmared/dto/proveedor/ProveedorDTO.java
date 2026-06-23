@@ -1,6 +1,6 @@
 package Farmared.dto.proveedor;
 
-import Farmared.model.proveedor.Proveedor;
+
 
 import java.util.ArrayList;
 

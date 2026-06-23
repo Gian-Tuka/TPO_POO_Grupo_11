@@ -12,12 +12,19 @@ public class RangoDeRetencion {
         this.retencion = retencion;
     }
 
-    private Boolean estaEnRango(float monto){
-        return null;
+    // Sección 1.4 — Bug 9: Lógica real implementada (antes retornaba null)
+    public boolean estaEnRango(float monto) {
+        return monto >= minimo && monto <= maximo;
     }
 
-    private Float calcularRetencion(float monto){
-        return null;
+    // Sección 1.4 — Bug 9: Lógica real implementada (antes retornaba null)
+    public float calcularRetencion(float monto) {
+        return monto * (retencion / 100f);
     }
+
+    // Getters faltantes (sección 1.3)
+    public float getMinimo() { return minimo; }
+    public float getMaximo() { return maximo; }
+    public float getRetencion() { return retencion; }
 }
 

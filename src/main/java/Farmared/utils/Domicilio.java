@@ -57,12 +57,9 @@ public class Domicilio {
         this.pais = pais;
     }
 
+    // Sección 1.6 — Bug 40: toString() corregido para incluir ciudad y pais
     @Override
     public String toString() {
-        return "Domicilio{" +
-                "calle='" + calle + '\'' +
-                ", numero=" + numero +
-                ", codigoPostal='" + codigoPostal + '\'' +
-                '}';
+        return calle + " " + numero + ", " + ciudad + ", " + pais + " (CP: " + codigoPostal + ")";
     }
 }
