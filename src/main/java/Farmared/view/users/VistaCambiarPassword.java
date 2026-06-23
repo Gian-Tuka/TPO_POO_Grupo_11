@@ -2,6 +2,7 @@ package Farmared.view.users;
 
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
 import Farmared.dto.user.UsuarioDTO;
+import Farmared.utils.Validations;
 
 import javax.swing.*;
 import java.awt.*;
@@ -59,7 +60,13 @@ public class VistaCambiarPassword extends JDialog {
 
         // Listeners
         btnBuscar.addActionListener(e -> buscarUsuario());
-        btnCambiar.addActionListener(e -> cambiarPassword());
+        btnCambiar.addActionListener(e -> {
+            try {
+                cambiarPassword();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
     private void buscarUsuario() {
@@ -87,13 +94,18 @@ public class VistaCambiarPassword extends JDialog {
         }
     }
 
-    private void cambiarPassword() {
+    private void cambiarPassword() throws Exception {
+        Validations v = new Validations();
         if (usuarioActual == null) return;
 
         String nuevaPassword = new String(txtNuevaPassword.getPassword()).trim();
         if (nuevaPassword.isEmpty()) {
             JOptionPane.showMessageDialog(this, "La contraseña no puede estar vacía.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
+        }
+
+        if (!v.passwordValida(nuevaPassword)) {
+            throw new Exception("La contraseña no cumple con alguno de los requisitos. Minimo: Una mayuscula, una minuscula, un numero y 8 caracteres.");
         }
 
         try {

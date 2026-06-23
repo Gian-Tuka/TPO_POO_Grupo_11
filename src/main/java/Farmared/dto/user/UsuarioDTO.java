@@ -10,14 +10,16 @@ public class UsuarioDTO {
     private String rol;
     private String area;
     private boolean activo;
+    private String password;
 
     //DTO para generar el alta desde la view (sin legajo)
-    public UsuarioDTO(String nombre, String apellido, String rol,  String area) {
+    public UsuarioDTO(String nombre, String apellido, String rol,  String area, String password) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.rol = rol;
         this.legajo = null;
         this.area = area;
+        this.password = password;
     }
     // DTO para mostrar informacion en la view
     public UsuarioDTO(String legajo, String nombre, String apellido, String rol,  String area, boolean activo) {

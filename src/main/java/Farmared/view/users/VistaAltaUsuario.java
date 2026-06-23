@@ -13,7 +13,7 @@ import java.awt.event.ActionListener;
 
 public class VistaAltaUsuario extends JDialog {
 
-    private JTextField txtNombre, txtApellido;
+    private JTextField txtNombre, txtApellido, txtPassword;
     private JComboBox<Rol> comboRol;
     private JComboBox<Area> comboArea;
     private JButton btnRegistrar;
@@ -24,13 +24,14 @@ public class VistaAltaUsuario extends JDialog {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        JPanel panelFormulario = new JPanel(new GridLayout(4, 2, 10, 10));
+        JPanel panelFormulario = new JPanel(new GridLayout(5, 2, 10, 10));
         panelFormulario.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         txtNombre = new JTextField();
         txtApellido = new JTextField();
         comboRol = new JComboBox<>(Rol.values());
         comboArea = new JComboBox<>(Area.values());
+        txtPassword = new JPasswordField();
 
         panelFormulario.add(new JLabel("Nombre:"));
         panelFormulario.add(txtNombre);
@@ -40,6 +41,9 @@ public class VistaAltaUsuario extends JDialog {
         panelFormulario.add(comboRol);
         panelFormulario.add(new JLabel("Área:"));
         panelFormulario.add(comboArea);
+        panelFormulario.add(new JLabel("Password:"));
+        panelFormulario.add(txtPassword);
+
 
         add(panelFormulario, BorderLayout.CENTER);
 
@@ -61,15 +65,20 @@ public class VistaAltaUsuario extends JDialog {
             Validations v = new Validations();
             String nombre = txtNombre.getText().trim();
             String apellido = txtApellido.getText().trim();
+            String password = txtPassword.getText().trim();
             
             v.requireNonEmpty(nombre, "El nombre es obligatorio");
             v.requireNonEmpty(apellido, "El apellido es obligatorio");
+            v.requireNonEmpty(password, "La contraseña es obligatoria");
             
             if (!v.contieneSoloLetras(nombre)) {
                 throw new Exception("El nombre solo debe contener letras y espacios");
             }
             if (!v.contieneSoloLetras(apellido)) {
                 throw new Exception("El apellido solo debe contener letras y espacios");
+            }
+            if (!v.passwordValida(password)) {
+                throw new Exception("La contraseña no cumple con alguno de los requisitos. Minimo: Una mayuscula, una minuscula, un numero y 8 caracteres.");
             }
 
             Rol rolSeleccionado = (Rol) comboRol.getSelectedItem();
@@ -79,7 +88,8 @@ public class VistaAltaUsuario extends JDialog {
                     nombre,
                     apellido,
                     rolSeleccionado.name(),
-                    areaSeleccionada.name()
+                    areaSeleccionada.name(),
+                    password
             );
 
             UsuarioDTO resultado = ControladorUsuariosYSeguridad.getInstance().altaUsuario(dto);

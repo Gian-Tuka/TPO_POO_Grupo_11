@@ -103,4 +103,21 @@ public class Validations {
         return str.matches(regex);
     }
 
+    public boolean passwordValida(String password) {
+        if (password == null || password.length() <= 8) return false;
+
+        boolean tieneMayuscula = false;
+        boolean tieneMinuscula = false;
+        boolean tieneNumero = false;
+
+        for (char c : password.toCharArray()) {
+            if (c == ' ') return false;
+            if (Character.isUpperCase(c)) tieneMayuscula = true;
+            if (Character.isLowerCase(c)) tieneMinuscula = true;
+            if (Character.isDigit(c)) tieneNumero = true;
+        }
+
+        return tieneMayuscula && tieneMinuscula && tieneNumero;
+    }
+
 }
