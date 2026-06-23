@@ -9,7 +9,7 @@ public class Usuario {
     private Rol rol;
     private Area area;
     private String password;
-
+    private boolean activo;
 
     public Usuario(String nombre, String apellido, Rol rol, Area area, String password) {
         this.legajo = generarLegajo();
@@ -18,6 +18,7 @@ public class Usuario {
         this.rol = rol;
         this.area = area;
         this.password = password;
+        this.activo = true;
     }
 
 
@@ -54,8 +55,16 @@ public class Usuario {
     public Area getArea() { return area; }
     public void setArea(Area area) { this.area = area; }
 
-    private void setPassword(String password) {
+    public void actualizarPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 
 

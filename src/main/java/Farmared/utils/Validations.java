@@ -96,4 +96,11 @@ public class Validations {
         }
     }
 
+    // Valida que un String contenga solo letras y espacios (sin números)
+    public boolean contieneSoloLetras(String str) {
+        if (isNullOrEmpty(str)) return false;
+        String regex = "^[A-Za-zÁ-Úá-úñÑ ]+$";
+        return str.matches(regex);
+    }
+
 }

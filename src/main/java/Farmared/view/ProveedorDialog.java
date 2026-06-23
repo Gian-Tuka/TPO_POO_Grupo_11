@@ -1,4 +1,4 @@
-package view;
+package Farmared.view;
 
 import javax.swing.*;
 import java.awt.*;

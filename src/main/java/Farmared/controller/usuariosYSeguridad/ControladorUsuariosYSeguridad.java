@@ -47,12 +47,16 @@ public class ControladorUsuariosYSeguridad {
         return toDTO(nuevo);
     }
 
-    public UsuarioDTO obtenerUsuarioActual(String legajo) {
+    public UsuarioDTO getUsuarioActual() {
+        if (this.usuarioActual == null) return null;
+        return toDTO(this.usuarioActual);
+    }
+
+    public UsuarioDTO consultarUsuario(String legajo) {
         Usuario usuario = buscarUsuario(legajo);
         if (usuario == null) {
             throw new UsuarioNoEncontradoException(legajo);
         }
-        this.usuarioActual = usuario;
         return toDTO(usuario);
     }
 
@@ -89,7 +93,7 @@ public class ControladorUsuariosYSeguridad {
 
     public boolean login(String legajo, String password) {
         Usuario usuario = buscarUsuario(legajo);
-        if (usuario != null && usuario.validarPassword(password)) {
+        if (usuario != null && usuario.isActivo() && usuario.validarPassword(password)) {
             this.usuarioActual = usuario;
             return true;
         }
@@ -107,6 +111,48 @@ public class ControladorUsuariosYSeguridad {
         return null;
     }
 
+    public void modificarUsuario(UsuarioDTO dto) {
+        Usuario usuario = buscarUsuario(dto.getLegajo());
+        if (usuario == null) {
+            throw new UsuarioNoEncontradoException(dto.getLegajo());
+        }
+        usuario.setNombre(dto.getNombre());
+        usuario.setApellido(dto.getApellido());
+        usuario.setRol(Rol.valueOf(dto.getRol()));
+        usuario.setArea(Area.valueOf(dto.getArea()));
+    }
+
+    public void eliminarUsuario(String legajo) {
+        Usuario usuario = buscarUsuario(legajo);
+        if (usuario == null) {
+            throw new UsuarioNoEncontradoException(legajo);
+        }
+        usuario.setActivo(false);
+    }
+
+    public void cambiarPassword(String legajo, String nuevaPassword) {
+        Usuario usuario = buscarUsuario(legajo);
+        if (usuario == null) {
+            throw new UsuarioNoEncontradoException(legajo);
+        }
+        usuario.actualizarPassword(nuevaPassword);
+    }
+
+    public ArrayList<UsuarioDTO> obtenerUsuariosDTO() {
+        ArrayList<UsuarioDTO> listaDTO = new ArrayList<>();
+        ArrayList<Usuario> copia = new ArrayList<>(usuarios);
+        
+        copia.sort((u1, u2) -> {
+            if (u1.isActivo() && !u2.isActivo()) return -1;
+            if (!u1.isActivo() && u2.isActivo()) return 1;
+            return 0; // maintain original order otherwise
+        });
+
+        for (Usuario u : copia) {
+            listaDTO.add(toDTO(u));
+        }
+        return listaDTO;
+    }
 
     private static Usuario toModel(UsuarioDTO dto){
         return new Usuario(
@@ -125,7 +171,8 @@ public class ControladorUsuariosYSeguridad {
                 model.getNombre(),
                 model.getApellido(),
                 model.getRol().name(),
-                model.getArea().name()
+                model.getArea().name(),
+                model.isActivo()
         );
     }
 }

@@ -7,6 +7,7 @@ import Farmared.model.item.UnidadDeMedida;
 import Farmared.view.LoginGUI;
 import Farmared.view.itemGUI.GUIItem;
 import Farmared.view.proveedorGUI.GUIProveedor;
+import Farmared.view.users.GUIUsuarios;
 
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.proveedor.ProveedorDTO;
@@ -47,7 +48,7 @@ public class MenuPrincipal extends JFrame {
         JButton btnOC = crearBotónMenu("Órdenes de Compra");
         JButton btnOP = crearBotónMenu("Órdenes de Pago");
         JButton btnComprobantes = crearBotónMenu("Comprobantes");
-        JButton btnSeguridad = crearBotónMenu("Seguridad");
+        JButton btnSeguridad = crearBotónMenu("Seguridad y Usuarios");
 
         if (authController.tieneAccesoAModulo("PROVEEDORES")) sidebar.add(btnProveedores);
         if (authController.tieneAccesoAModulo("PRODUCTOS")) sidebar.add(btnProductos);
@@ -66,7 +67,7 @@ public class MenuPrincipal extends JFrame {
         cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Compra (OC)"), "OC");
         cardPanel.add(crearPanelOrdenesPago(), "OP");
         cardPanel.add(crearPanelGenerico("Módulo de Comprobantes"), "COMPROBANTES");
-        cardPanel.add(crearPanelGenerico("Módulo de Seguridad"), "SEGURIDAD");
+        cardPanel.add(new GUIUsuarios(), "SEGURIDAD Y USUARIOS");
 
         add(cardPanel, BorderLayout.CENTER);
 
@@ -75,7 +76,7 @@ public class MenuPrincipal extends JFrame {
         btnOC.addActionListener(e -> cardLayout.show(cardPanel, "OC"));
         btnOP.addActionListener(e -> cardLayout.show(cardPanel, "OP"));
         btnComprobantes.addActionListener(e -> cardLayout.show(cardPanel, "COMPROBANTES"));
-        btnSeguridad.addActionListener(e -> cardLayout.show(cardPanel, "SEGURIDAD"));
+        btnSeguridad.addActionListener(e -> cardLayout.show(cardPanel, "SEGURIDAD Y USUARIOS"));
     }
 
     private JButton crearBotónMenu(String texto) {

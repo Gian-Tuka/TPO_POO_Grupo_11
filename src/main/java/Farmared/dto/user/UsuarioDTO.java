@@ -9,6 +9,7 @@ public class UsuarioDTO {
     private String apellido;
     private String rol;
     private String area;
+    private boolean activo;
 
     //DTO para generar el alta desde la view (sin legajo)
     public UsuarioDTO(String nombre, String apellido, String rol,  String area) {
@@ -19,12 +20,13 @@ public class UsuarioDTO {
         this.area = area;
     }
     // DTO para mostrar informacion en la view
-    public UsuarioDTO(String legajo, String nombre, String apellido, String rol,  String area) {
+    public UsuarioDTO(String legajo, String nombre, String apellido, String rol,  String area, boolean activo) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.rol = rol;
         this.legajo = legajo;
         this.area = area;
+        this.activo = activo;
     }
 
     public String getNombre() {
@@ -61,6 +63,9 @@ public class UsuarioDTO {
 
     public String getArea() {return area;}
     public void setArea(String area) {this.area = area;}
+
+    public boolean isActivo() { return activo; }
+    public void setActivo(boolean activo) { this.activo = activo; }
 
     @Override
     public String toString() {
