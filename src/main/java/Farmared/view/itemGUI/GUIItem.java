@@ -35,13 +35,35 @@ public class GUIItem extends JPanel {
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // Tabla Productos
-        String[] columnasProductos = {"Código", "Descripción", "Unidad", "IVA", "Rubro", "Precio Vigente"};
+        String[] columnasProductos = {"Código", "Descripción", "Unidad", "Tipo unidad", "IVA", "Rubro", "Precio Vigente"};
         modeloTablaProductos = new DefaultTableModel(columnasProductos, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         JTable tablaProductos = new JTable(modeloTablaProductos);
         tabbedPane.addTab("Productos", new JScrollPane(tablaProductos));
+
+
+
+//        String[] columnas = {"Razón Social", "CUIT", "Teléfono", "Condición IVA"};
+//        modeloTablaProveedores = new DefaultTableModel(columnas, 0) {
+//            @Override
+//            public boolean isCellEditable(int row, int column) {
+//                return false;
+//            }
+//        };
+//
+//        JTable tabla = new JTable(modeloTablaProveedores);
+//        JScrollPane scrollPane = new JScrollPane(tabla);
+//        this.add(scrollPane, BorderLayout.CENTER);
+//
+//        // Llamada al método que llena la tabla
+//        actualizarTablaProveedores();
+//
+
+
+
+
 
         // Tabla Servicios
         String[] columnasServicios = {"Código", "Descripción", "Unidad", "IVA", "Rubro", "Precio Vigente"};
@@ -53,7 +75,9 @@ public class GUIItem extends JPanel {
         JTable tablaServicios = new JTable(modeloTablaServicios);
         tabbedPane.addTab("Servicios", new JScrollPane(tablaServicios));
 
+        JScrollPane scrollPaneServicios = new JScrollPane(tablaServicios);
         this.add(tabbedPane, BorderLayout.CENTER);
+
 
         // Listeners optimizados para refrescar solo lo que corresponde
         btnNuevo.addActionListener(e -> {
@@ -82,7 +106,14 @@ public class GUIItem extends JPanel {
         modeloTablaProductos.setRowCount(0);
         ArrayList<ItemDTO> productos = ControladorProductosYServicios.getInstance().obtenerSoloProductos();
         for (ItemDTO p : productos) {
-            Object[] fila = { p.getCodigo(), p.getDescripcionDeItem(), p.getUnidadMedida(), p.getTipoDeIVA(), p.getRubro(), p.getPrecioItem() };
+            Object[] fila = {
+                    p.getCodigo(),
+                    p.getDescripcionDeItem(),
+                    p.getDescripcionUnidadMedida(),
+                    p.getTipoUDM(),
+                    p.getTipoDeIVA(),
+                    p.getRubro(),
+                    p.getPrecioVigente() };
             modeloTablaProductos.addRow(fila);
         }
     }
@@ -91,7 +122,13 @@ public class GUIItem extends JPanel {
         modeloTablaServicios.setRowCount(0);
         ArrayList<ItemDTO> servicios = ControladorProductosYServicios.getInstance().obtenerSoloServicios();
         for (ItemDTO s : servicios) {
-            Object[] fila = { s.getCodigo(), s.getDescripcionDeItem(), s.getUnidadMedida(), s.getTipoDeIVA(), s.getRubro(), s.getPrecioItem() };
+            Object[] fila = {
+                    s.getCodigo(),
+                    s.getDescripcionDeItem(),
+                    s.getDescripcionUnidadMedida(),
+                    s.getTipoDeIVA(),
+                    s.getRubro(),
+                    s.getPrecioVigente() };
             modeloTablaServicios.addRow(fila);
         }
     }
