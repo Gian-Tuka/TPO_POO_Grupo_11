@@ -66,6 +66,11 @@ public abstract class Item {
         this.precioItem.add(precio);
     }
 
+    // Sección 1.5 — Método de encapsulamiento para eliminar precios
+    public void eliminarPrecio(PrecioProveedor pp) {
+        precioItem.remove(pp);
+    }
+
     // Bug 35 — Setters faltantes para atributos mutables
     public void setDescripcionDeItem(String descripcionDeItem) { this.descripcionDeItem = descripcionDeItem; }
     public void setUnidadMedida(UnidadDeMedida unidadMedida) { this.unidadMedida = unidadMedida; }
