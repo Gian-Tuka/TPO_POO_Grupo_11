@@ -3,6 +3,7 @@ package Farmared.model.ordenCompra;
 import Farmared.model.item.Item;
 import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.proveedor.Proveedor;
+import Farmared.exception.FarmaredException;
 
 public class DetalleOC {
     private Item item;
@@ -32,7 +33,8 @@ public class DetalleOC {
                 return;
             }
         }
-        System.out.println("No se encontró el precio para el item en el proveedor especificado.");
+        throw new FarmaredException("No se encontró el precio para el item: " + 
+                (item != null ? item.getDescripcionDeItem() : "null") + " en el proveedor: " + proveedor.getRazonSocial());
     }
 
     public Item getItem() {
@@ -45,5 +47,9 @@ public class DetalleOC {
 
     public Float getSubtotalPorItem() {
         return subtotalPorItem != null ? subtotalPorItem : 0f;
+    }
+
+    public float getPrecioUnitarioVal() {
+        return precioUnitario != null ? precioUnitario.getPrecioItem() : 0f;
     }
 }

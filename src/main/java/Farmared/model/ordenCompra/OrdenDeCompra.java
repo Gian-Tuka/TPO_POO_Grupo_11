@@ -53,18 +53,16 @@ public class OrdenDeCompra {
         return total;
     }
 
-    public void settearEstado(EstadoOC estado) {
+    public void setEstado(EstadoOC estado) {
         this.estado = estado;
+    }
+
+    public void settearEstado(EstadoOC estado) {
+        this.setEstado(estado);
     }
 
     public Usuario obtenerCreador() {
         return this.creador;
-    }
-
-    public List<OrdenDeCompra> reporteOC() {
-        List<OrdenDeCompra> list = new ArrayList<>();
-        list.add(this);
-        return list;
     }
 
     public Float obtenerTotalOC() {

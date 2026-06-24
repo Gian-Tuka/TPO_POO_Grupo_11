@@ -100,7 +100,7 @@ public class ControladorUsuariosYSeguridad {
         return false;
     }
 
-    private Usuario buscarUsuario(String legajo) {
+    public Usuario buscarUsuario(String legajo) {
 
         for (int i = 0; i < usuarios.size(); i++) {
             if (usuarios.get(i).getLegajo().equals(legajo)) {

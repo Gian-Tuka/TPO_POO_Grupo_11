@@ -61,7 +61,7 @@ public class MenuPrincipal extends JFrame {
 
         cardPanel.add(new GUIProveedor(), "PROVEEDORES");
         cardPanel.add(new GUIItem(this), "PRODUCTOS");
-        cardPanel.add(crearPanelGenerico("Módulo de Ordenes de Compra"), "Ordenes de Compra");
+        cardPanel.add(new Farmared.view.ordenCompra.OrdenDeCompraGUI(), "OC");
         cardPanel.add(crearPanelOrdenesPago(), "OP");
         cardPanel.add(crearPanelGenerico("Módulo de Comprobantes"), "COMPROBANTES");
         cardPanel.add(new GUIUsuarios(), "SEGURIDAD Y USUARIOS");
