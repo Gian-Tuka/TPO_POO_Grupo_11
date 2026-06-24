@@ -1,0 +1,87 @@
+package Farmared.view.comprobantesGUI;
+
+import Farmared.controller.comprobantes.ControladorComprobantes;
+import Farmared.dto.comprobante.NotaDebitoDTO;
+import Farmared.dto.proveedor.ProveedorDTO;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+
+public class VistaAltaNotaDebito extends JDialog {
+
+    private JComboBox<String> comboProveedores;
+    private ArrayList<ProveedorDTO> listaProveedores;
+    private JTextField txtDescripcion;
+    private JTextField txtMonto;
+
+    public VistaAltaNotaDebito(JFrame parent) {
+        super(parent, "Alta Nota de Débito", true);
+        setSize(450, 300);
+        setLocationRelativeTo(parent);
+        setLayout(new BorderLayout());
+        getContentPane().setBackground(new Color(245, 245, 250));
+
+        JPanel panelForm = new JPanel(new GridBagLayout());
+        panelForm.setBackground(new Color(245, 245, 250));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        listaProveedores = ControladorComprobantes.getInstance().obtenerProveedoresParaCombo();
+        comboProveedores = new JComboBox<>();
+        for (ProveedorDTO p : listaProveedores) {
+            comboProveedores.addItem(p.getRazonSocial() + " (" + p.getCuit() + ")");
+        }
+
+        txtDescripcion = new JTextField(20);
+        txtMonto = new JTextField(10);
+
+        gbc.gridx=0; gbc.gridy=0; panelForm.add(new JLabel("Proveedor:"), gbc);
+        gbc.gridx=1; panelForm.add(comboProveedores, gbc);
+
+        gbc.gridx=0; gbc.gridy=1; panelForm.add(new JLabel("Descripción:"), gbc);
+        gbc.gridx=1; panelForm.add(txtDescripcion, gbc);
+
+        gbc.gridx=0; gbc.gridy=2; panelForm.add(new JLabel("Monto:"), gbc);
+        gbc.gridx=1; panelForm.add(txtMonto, gbc);
+
+        add(panelForm, BorderLayout.CENTER);
+
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnGuardar = new JButton("Guardar");
+        btnGuardar.setBackground(new Color(155, 89, 182)); // Purple theme for ND
+        btnGuardar.setForeground(Color.WHITE);
+        btnGuardar.addActionListener(e -> guardar());
+
+        JButton btnCancelar = new JButton("Cancelar");
+        btnCancelar.setBackground(new Color(231, 76, 60));
+        btnCancelar.setForeground(Color.WHITE);
+        btnCancelar.addActionListener(e -> dispose());
+
+        panelBotones.add(btnGuardar);
+        panelBotones.add(btnCancelar);
+        add(panelBotones, BorderLayout.SOUTH);
+    }
+
+    private void guardar() {
+        try {
+            int idx = comboProveedores.getSelectedIndex();
+            if (idx < 0) return;
+            
+            String cuit = listaProveedores.get(idx).getCuit();
+            String desc = txtDescripcion.getText();
+            float monto = Float.parseFloat(txtMonto.getText());
+
+            NotaDebitoDTO dto = new NotaDebitoDTO(cuit, desc, monto);
+            ControladorComprobantes.getInstance().altaNotaDeDebito(dto);
+
+            JOptionPane.showMessageDialog(this, "Nota de Débito creada exitosamente.");
+            dispose();
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Verifique el monto ingresado.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    }
+}
