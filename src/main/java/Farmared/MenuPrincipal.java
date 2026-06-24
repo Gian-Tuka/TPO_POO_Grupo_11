@@ -6,6 +6,7 @@ import Farmared.view.LoginGUI;
 import Farmared.view.itemGUI.GUIItem;
 import Farmared.view.proveedorGUI.GUIProveedor;
 import Farmared.view.users.GUIUsuarios;
+import Farmared.view.comprobantesGUI.GUIComprobantes;
 
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.proveedor.ProveedorDTO;
@@ -63,7 +64,7 @@ public class MenuPrincipal extends JFrame {
         cardPanel.add(new GUIItem(this), "PRODUCTOS");
         cardPanel.add(new Farmared.view.ordenCompra.OrdenDeCompraGUI(), "OC");
         cardPanel.add(crearPanelOrdenesPago(), "OP");
-        cardPanel.add(crearPanelGenerico("Módulo de Comprobantes"), "COMPROBANTES");
+        cardPanel.add(new GUIComprobantes(this), "COMPROBANTES");
         cardPanel.add(new GUIUsuarios(), "SEGURIDAD Y USUARIOS");
 
         add(cardPanel, BorderLayout.CENTER);

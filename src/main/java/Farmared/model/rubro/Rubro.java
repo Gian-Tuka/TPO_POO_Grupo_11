@@ -28,16 +28,16 @@ public class Rubro {
     public void setTipoRubro(TipoRubro tipoRubro) { this.tipoRubro = tipoRubro; }
 
     // equals/hashCode basado en idRubro (sección 1.2)
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Rubro rubro = (Rubro) o;
-        return Objects.equals(idRubro, rubro.idRubro);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(idRubro);
-    }
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        Rubro rubro = (Rubro) o;
+//        return Objects.equals(idRubro, rubro.idRubro);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(idRubro);
+//    }
 }

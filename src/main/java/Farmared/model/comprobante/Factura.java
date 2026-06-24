@@ -11,11 +11,13 @@ import java.util.List;
 public class Factura extends Comprobante {
     private OrdenDeCompra ordenDeCompra;
     private List<DetalleComprobante> detalles;
+    private TipoFactura tipoFactura;
 
     public Factura(int nroComprobante, Date fecha, Proveedor proveedor,
-                   String descripcion, OrdenDeCompra ordenDeCompra) {
+                   String descripcion, OrdenDeCompra ordenDeCompra, TipoFactura tipoFactura) {
         super(nroComprobante, fecha, 0f, proveedor, descripcion);
         this.ordenDeCompra = ordenDeCompra;
+        this.tipoFactura = tipoFactura;
         this.detalles = new ArrayList<>();
     }
 
@@ -55,5 +57,9 @@ public class Factura extends Comprobante {
 
     public List<DetalleComprobante> getDetalles() {
         return Collections.unmodifiableList(detalles);
+    }
+
+    public TipoFactura getTipoFactura() {
+        return tipoFactura;
     }
 }
