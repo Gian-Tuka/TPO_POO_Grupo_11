@@ -177,19 +177,7 @@ public class Proveedor {
         this.cuit = cuit;
     }
 
-    // Bug 33 — equals/hashCode basado en CUIT (clave natural única)
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Proveedor that = (Proveedor) o;
-        return Objects.equals(cuit, that.cuit);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(cuit);
-    }
 }
 
 
