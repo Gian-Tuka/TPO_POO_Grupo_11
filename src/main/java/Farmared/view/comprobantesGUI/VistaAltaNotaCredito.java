@@ -19,7 +19,7 @@ public class VistaAltaNotaCredito extends JDialog {
 
     public VistaAltaNotaCredito(JFrame parent) {
         super(parent, "Alta Nota de Crédito", true);
-        setSize(450, 350);
+        setSize(500, 400);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(245, 245, 250));
@@ -57,12 +57,12 @@ public class VistaAltaNotaCredito extends JDialog {
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnGuardar = new JButton("Guardar");
         btnGuardar.setBackground(new Color(230, 126, 34)); // Orange theme for NC
-        btnGuardar.setForeground(Color.WHITE);
+        btnGuardar.setForeground(Color.BLACK);
         btnGuardar.addActionListener(e -> guardar());
 
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.setBackground(new Color(231, 76, 60));
-        btnCancelar.setForeground(Color.WHITE);
+        btnCancelar.setForeground(Color.BLACK);
         btnCancelar.addActionListener(e -> dispose());
 
         panelBotones.add(btnGuardar);

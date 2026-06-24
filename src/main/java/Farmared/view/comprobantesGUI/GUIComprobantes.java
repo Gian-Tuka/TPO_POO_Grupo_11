@@ -137,7 +137,7 @@ public class GUIComprobantes extends JPanel {
     private JButton crearBoton(String texto, Color bg) {
         JButton btn = new JButton(texto);
         btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setFocusPainted(false);
         btn.setOpaque(true);

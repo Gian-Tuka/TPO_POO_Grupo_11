@@ -15,7 +15,7 @@ public class VistaModificacionFactura extends JDialog {
 
     public VistaModificacionFactura(JFrame parent, int nroComprobante) {
         super(parent, "Modificar Factura", true);
-        setSize(450, 350);
+        setSize(500, 450);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(245, 245, 250));
@@ -57,12 +57,12 @@ public class VistaModificacionFactura extends JDialog {
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnGuardar = new JButton("Guardar");
         btnGuardar.setBackground(new Color(52, 152, 219));
-        btnGuardar.setForeground(Color.WHITE);
+        btnGuardar.setForeground(Color.BLACK);
         btnGuardar.addActionListener(e -> guardar());
 
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.setBackground(new Color(231, 76, 60));
-        btnCancelar.setForeground(Color.WHITE);
+        btnCancelar.setForeground(Color.BLACK);
         btnCancelar.addActionListener(e -> dispose());
 
         panelBotones.add(btnGuardar);
