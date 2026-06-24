@@ -89,6 +89,15 @@ public class ControladorDeOrdenDeCompra {
         return false;
     }
 
+//    public Proveedor buscarProveedorPorCuit(String cuit) {
+//        for (int i = 0; i < proveedores.size(); i++) {
+//            if (proveedores.get(i).getCuit().equals(cuit)) {
+//                return proveedores.get(i);
+//            }
+//        }
+//        return null;
+//    }
+
     public List<OrdenDeCompra> getOrdenesDeCompra() {
         return ordenesDeCompra;
     }

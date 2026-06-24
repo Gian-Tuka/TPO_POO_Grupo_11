@@ -199,7 +199,7 @@ public class ControladorProveedores {
         return null;
     }
 
-    private Rubro buscarRubroPorNombre(String nombre) {
+    public Rubro buscarRubroPorNombre(String nombre) {
         for (Rubro r : rubrosGlobales) {
             if (r.getNombreRubro().equals(nombre)) {
                 return r;

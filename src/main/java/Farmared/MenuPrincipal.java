@@ -2,8 +2,6 @@ package Farmared;
 
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
 import Farmared.dto.rubro.RubroDTO;
-import Farmared.model.item.TipoDeUnidad;
-import Farmared.model.item.UnidadDeMedida;
 import Farmared.view.LoginGUI;
 import Farmared.view.itemGUI.GUIItem;
 import Farmared.view.proveedorGUI.GUIProveedor;
@@ -13,7 +11,6 @@ import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.proveedor.ProveedorDTO;
 
 import Farmared.controller.item.ControladorProductosYServicios;
-import Farmared.dto.item.ItemDTO;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -64,7 +61,7 @@ public class MenuPrincipal extends JFrame {
 
         cardPanel.add(new GUIProveedor(), "PROVEEDORES");
         cardPanel.add(new GUIItem(this), "PRODUCTOS");
-        cardPanel.add(crearPanelGenerico("Módulo de Órdenes de Compra (OC)"), "OC");
+        cardPanel.add(crearPanelGenerico("Módulo de Ordenes de Compra"), "Ordenes de Compra");
         cardPanel.add(crearPanelOrdenesPago(), "OP");
         cardPanel.add(crearPanelGenerico("Módulo de Comprobantes"), "COMPROBANTES");
         cardPanel.add(new GUIUsuarios(), "SEGURIDAD Y USUARIOS");
@@ -148,11 +145,6 @@ public class MenuPrincipal extends JFrame {
             }
         }
     }
-
-
-
-
-
 
 
     public static void main(String[] args) {

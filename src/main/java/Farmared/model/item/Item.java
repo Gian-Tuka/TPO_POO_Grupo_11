@@ -13,6 +13,7 @@ public abstract class Item {
     protected ArrayList<PrecioProveedor> precioItem;
     protected TipoDeIVA tipoDeIVA;
     protected Rubro rubro;
+    protected boolean activo;
 
     public Item(String descripcionDeItem, UnidadDeMedida  unidadMedida, TipoDeIVA tipoDeIVA, Rubro rubro) {
         this.codigo = generarCod();
@@ -21,7 +22,7 @@ public abstract class Item {
         this.tipoDeIVA = tipoDeIVA;
         this.rubro = rubro;
         this.precioItem = new ArrayList<>();
-
+        this.activo = true;
     }
 
     public String getCodigo() {
@@ -76,6 +77,9 @@ public abstract class Item {
     public void setUnidadMedida(UnidadDeMedida unidadMedida) { this.unidadMedida = unidadMedida; }
     public void setTipoDeIVA(TipoDeIVA tipoDeIVA) { this.tipoDeIVA = tipoDeIVA; }
     public void setRubro(Rubro rubro) { this.rubro = rubro; }
+
+    public boolean isActivo() { return activo; }
+    public void setActivo(boolean activo) { this.activo = activo; }
 
     // Bug 12 — equals/hashCode basado en codigo (clave natural única)
     @Override

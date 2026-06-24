@@ -30,7 +30,7 @@ public class VistaAltaRubro extends JFrame {
         panelForm.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         txtNombre = new JTextField();
-        comboTipo = new JComboBox<>(new String[]{"BIENES", "SERVICIO"});
+        comboTipo = new JComboBox<>(new String[]{"BIENES", "SERVICIOS"});
         btnRegistrar = new JButton("Registrar Rubro");
 
         panelForm.add(new JLabel("Nombre del Rubro:"));

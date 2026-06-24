@@ -9,8 +9,9 @@ public class ItemDTO {
     private String rubro;
     private String precioVigente;
     private String tipoItem;
+    private boolean activo;
 
-    public ItemDTO(String codigo, String descripcionDeItem, String descripcionUDM, String tipoUDM, String tipoDeIVA, String rubro, String precioVigente) {
+    public ItemDTO(String codigo, String descripcionDeItem, String descripcionUDM, String tipoUDM, String tipoDeIVA, String rubro, String precioVigente, boolean activo) {
         this.codigo = codigo;
         this.descripcionDeItem = descripcionDeItem;
         this.descripcionUnidadMedida = descripcionUDM;
@@ -18,6 +19,7 @@ public class ItemDTO {
         this.tipoDeIVA = tipoDeIVA;
         this.rubro = rubro;
         this.precioVigente = precioVigente;
+        this.activo = activo;
     }
 
     public ItemDTO(String descripcionDeItem, String descripcionUDM, String tipoUDM, String tipoDeIVA, String rubro) {
@@ -33,7 +35,17 @@ public class ItemDTO {
         return tipoItem;
     }
 
-    public void setTipoItem(String tipoItem) {}
+    public void setTipoItem(String tipoItem) {
+        this.tipoItem = tipoItem;
+    }
+    
+    public boolean isActivo() {
+        return activo;
+    }
+    
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
 
     public String getPrecioVigente() {
         return precioVigente;
@@ -45,6 +57,10 @@ public class ItemDTO {
 
     public String getDescripcionUnidadMedida() {
         return descripcionUnidadMedida;
+    }
+    
+    public void setDescripcionUnidadMedida(String descripcionUnidadMedida) {
+        this.descripcionUnidadMedida = descripcionUnidadMedida;
     }
     public String getTipoUDM() {
         return tipoUDM;

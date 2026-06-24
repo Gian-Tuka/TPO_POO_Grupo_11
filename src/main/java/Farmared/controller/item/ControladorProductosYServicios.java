@@ -2,6 +2,7 @@ package Farmared.controller.item;
 
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.item.ItemDTO;
+import Farmared.dto.item.UnidadDeMedidaDTO;
 import Farmared.dto.proveedor.ProveedorDTO;
 import Farmared.exception.InvalidItemException;
 import Farmared.exception.RubroNotExistException;
@@ -103,15 +104,24 @@ public class ControladorProductosYServicios {
             precioVigente = String.valueOf(ultimo);
         }
 
-        return new ItemDTO(
+        ItemDTO dto = new ItemDTO(
                 item.getCodigo(),
                 item.getDescripcionDeItem(),
                 item.getUnidadMedida().getDescripcionUnidad(),
                 item.getUnidadMedida().getCodigoUnidad(),
                 item.getTipoDeIVA().name(),
                 item.getRubro().getNombreRubro(),
-                precioVigente
+                precioVigente,
+                item.isActivo()
         );
+        
+        if (item instanceof Producto) {
+            dto.setTipoItem("PRODUCTO");
+        } else if (item instanceof Servicio) {
+            dto.setTipoItem("SERVICIO");
+        }
+        
+        return dto;
     }
 
     public Item toModel(ItemDTO dto) throws Exception {
@@ -125,7 +135,7 @@ public class ControladorProductosYServicios {
 
         TipoDeIVA enumIVA = TipoDeIVA.valueOf(dto.getTipoDeIVA());
 
-        Rubro rubroModelo = ControladorProveedores.getInstance().buscarRubroPorId(dto.getRubro());
+        Rubro rubroModelo = ControladorProveedores.getInstance().buscarRubroPorNombre(dto.getRubro());
         if (rubroModelo == null) {
             throw new RubroNotExistException("El Rubro seleccionado no existe.");
         }
@@ -142,4 +152,95 @@ public class ControladorProductosYServicios {
         return itemResultado;
     }
 
+    public ArrayList<ItemDTO> obtenerItemsDTO() {
+        ArrayList<ItemDTO> itemsDTO = new ArrayList<>();
+        for (Item item : items) {
+            if (item.isActivo()) {
+                itemsDTO.add(toDTO(item));
+            }
+        }
+        return itemsDTO;
+    }
+
+    public ArrayList<UnidadDeMedidaDTO> obtenerUnidadesDeMedidaDTO() {
+        ArrayList<UnidadDeMedidaDTO> udmDTOs = new ArrayList<>();
+        for (UnidadDeMedida udm : unidadesDeMedida) {
+            udmDTOs.add(new UnidadDeMedidaDTO(udm.getCodigoUnidad(), udm.getDescripcionUnidad(), udm.getTipoDeUnidad().name()));
+        }
+        return udmDTOs;
+    }
+
+    public UnidadDeMedidaDTO altaUnidadDeMedida(UnidadDeMedidaDTO dto) {
+        TipoDeUnidad tipo = TipoDeUnidad.valueOf(dto.getTipoDeUnidad());
+        UnidadDeMedida nuevaUdm = new UnidadDeMedida(dto.getDescripcionUnidad(), tipo);
+        unidadesDeMedida.add(nuevaUdm);
+        return new UnidadDeMedidaDTO(nuevaUdm.getCodigoUnidad(), nuevaUdm.getDescripcionUnidad(), nuevaUdm.getTipoDeUnidad().name());
+    }
+
+    public void modificarUnidadDeMedida(UnidadDeMedidaDTO dto) throws Exception {
+        UnidadDeMedida udm = buscarUnidadModelo(dto.getCodigoUnidad());
+        if (udm != null) {
+            udm.setDescripcionUnidad(dto.getDescripcionUnidad());
+            udm.setTipoDeUnidad(TipoDeUnidad.valueOf(dto.getTipoDeUnidad()));
+        } else {
+            throw new Exception("Unidad de medida no encontrada");
+        }
+    }
+
+    public void eliminarUnidadDeMedida(String codigo) throws Exception {
+        UnidadDeMedida udm = buscarUnidadModelo(codigo);
+        if (udm != null) {
+            unidadesDeMedida.remove(udm);
+        } else {
+            throw new Exception("Unidad de medida no encontrada");
+        }
+    }
+
+    public void modificarItem(ItemDTO dto) throws Exception {
+        Item item = buscarItemModeloPorCodigo(dto.getCodigo());
+        if (item == null) {
+            throw new InvalidItemException("Item no encontrado.");
+        }
+        
+        item.setDescripcionDeItem(dto.getDescripcionDeItem());
+        
+        UnidadDeMedida udm = buscarUnidadModelo(dto.getTipoUDM());
+        if (udm != null) {
+            item.setUnidadMedida(udm);
+        }
+
+        item.setTipoDeIVA(TipoDeIVA.valueOf(dto.getTipoDeIVA()));
+
+        Rubro rubroModelo = ControladorProveedores.getInstance().buscarRubroPorNombre(dto.getRubro());
+        if (rubroModelo != null) {
+            item.setRubro(rubroModelo);
+        }
+    }
+
+    public void eliminarItem(String codigo) throws Exception {
+        Item item = buscarItemModeloPorCodigo(codigo);
+        if (item != null) {
+            item.setActivo(false);
+        } else {
+            throw new InvalidItemException("Item no encontrado.");
+        }
+    }
+
+    public String[] obtenerTiposDeIva() {
+        TipoDeIVA[] values = TipoDeIVA.values();
+        String[] nombres = new String[values.length];
+        for (int i = 0; i < values.length; i++) {
+            nombres[i] = values[i].name();
+        }
+        return nombres;
+    }
+
+    public String[] obtenerTiposDeUnidad() {
+        TipoDeUnidad[] values = TipoDeUnidad.values();
+        String[] nombres = new String[values.length];
+        for (int i = 0; i < values.length; i++) {
+            nombres[i] = values[i].name();
+        }
+        return nombres;
+    }
 }
