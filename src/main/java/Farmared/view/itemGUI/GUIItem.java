@@ -24,12 +24,14 @@ public class GUIItem extends JPanel {
         JButton btnModificar = new JButton("Modificar Ítem");
         JButton btnEliminar = new JButton("Eliminar Ítem");
         JButton btnGestionarUDM = new JButton("Gestionar UDM");
+        JButton btnPreciosProv = new JButton("Ver Precios por Prov.");
 
         barraAcciones.add(btnCrear);
         barraAcciones.add(btnModificar);
         barraAcciones.add(btnEliminar);
         barraAcciones.add(new JSeparator(SwingConstants.VERTICAL));
         barraAcciones.add(btnGestionarUDM);
+        barraAcciones.add(btnPreciosProv);
 
         this.add(barraAcciones, BorderLayout.NORTH);
 
@@ -43,6 +45,7 @@ public class GUIItem extends JPanel {
         };
 
         JTable tablaItems = new JTable(modeloTablaItems);
+        tablaItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(tablaItems);
         this.add(scrollPane, BorderLayout.CENTER);
 
@@ -68,8 +71,18 @@ public class GUIItem extends JPanel {
         btnGestionarUDM.addActionListener(e -> {
             VistaABMUnidadDeMedida vistaUDM = new VistaABMUnidadDeMedida(ventanaPrincipal);
             vistaUDM.setVisible(true);
-            // No es estrictamente necesario actualizar la tabla principal, pero se hace por coherencia
             actualizarTabla(); 
+        });
+
+        btnPreciosProv.addActionListener(e -> {
+            int fila = tablaItems.getSelectedRow();
+            if (fila == -1) {
+                JOptionPane.showMessageDialog(this, "Debe seleccionar un ítem de la tabla.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String codigoItem = (String) modeloTablaItems.getValueAt(fila, 0);
+            VistaPreciosPorProveedor vistaPrecios = new VistaPreciosPorProveedor(ventanaPrincipal, codigoItem);
+            vistaPrecios.setVisible(true);
         });
 
         // Llenar tabla inicialmente

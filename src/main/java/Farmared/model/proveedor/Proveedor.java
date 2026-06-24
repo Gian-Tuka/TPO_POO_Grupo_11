@@ -60,7 +60,7 @@ public class Proveedor {
         this.precioPorItem.add(precio);
     }
 
-    // Sección 1.5 — Métodos de encapsulamiento faltantes
+    // Sección  — Métodos de encapsulamiento faltantes
     public void agregarImpuesto(ImpuestoRetenible impuesto) {
         if (!impuestos.contains(impuesto)) {
             impuestos.add(impuesto);
@@ -164,7 +164,7 @@ public class Proveedor {
         this.rubroProveedor = rubroProveedor;
     }
 
-    // Bug 22 — Setter faltante para fechaInicioActividades
+    //  — Setter faltante para fechaInicioActividades
     public void setFechaInicioActividades(Date fechaInicioActividades) {
         this.fechaInicioActividades = fechaInicioActividades;
     }

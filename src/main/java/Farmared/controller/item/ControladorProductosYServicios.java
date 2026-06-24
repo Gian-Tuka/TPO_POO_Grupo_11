@@ -11,6 +11,9 @@ import Farmared.model.item.*;
 import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.proveedor.Proveedor;
 import Farmared.model.rubro.Rubro;
+import Farmared.model.rubro.TipoRubro;
+import Farmared.dto.item.PrecioProveedorDTO;
+import Farmared.utils.UtilDate;
 import Farmared.utils.Validations;
 import java.util.ArrayList;
 import java.util.Date;
@@ -122,6 +125,24 @@ public class ControladorProductosYServicios {
         }
         
         return dto;
+    }
+
+    public ArrayList<PrecioProveedorDTO> obtenerProveedoresPorItem(String codigoItem) {
+        Item item = buscarItemModeloPorCodigo(codigoItem);
+        if (item == null) throw new InvalidItemException("Item no encontrado.");
+
+        ArrayList<PrecioProveedorDTO> lista = new ArrayList<>();
+        for (PrecioProveedor pp : item.getPrecioItem()) {
+            lista.add(new PrecioProveedorDTO(
+                    pp.getProveedor().getCuit(),
+                    pp.getProveedor().getRazonSocial(),
+                    item.getCodigo(),
+                    item.getDescripcionDeItem(),
+                    String.valueOf(pp.getPrecioItem()),
+                    UtilDate.parseDate(pp.getFecha())
+            ));
+        }
+        return lista;
     }
 
     public Item toModel(ItemDTO dto) throws Exception {

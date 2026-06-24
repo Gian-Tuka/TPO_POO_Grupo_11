@@ -4,12 +4,17 @@ import Farmared.controller.item.ControladorProductosYServicios;
 import Farmared.controller.ordenes.ControladorDeOrdenDeCompra;
 import Farmared.dto.proveedor.ProveedorDTO;
 import Farmared.dto.rubro.RubroDTO;
+import Farmared.dto.impuesto.CertificadoNoRetencionDTO;
+import Farmared.dto.proveedor.CuentaCorrienteDTO;
+import Farmared.dto.item.PrecioProveedorDTO;
 import Farmared.exception.FarmaredException;
 import Farmared.exception.ProveedorNoEncontradoException;
 import Farmared.model.item.Item;
 import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.proveedor.CondicionIVA;
 import Farmared.model.proveedor.Proveedor;
+import Farmared.model.impuesto.ImpuestoRetenible;
+import Farmared.model.impuesto.CertificadoNoRetencion;
 import Farmared.model.rubro.Rubro;
 import Farmared.model.rubro.TipoRubro;
 import Farmared.model.user.Area;
@@ -148,6 +153,65 @@ public class ControladorProveedores {
                 // Ignore errors during simulation loading
             }
         }
+    }
+
+    // Nuevos métodos para Certificados y Cuenta Corriente
+    public void registrarCertificadoNoRetencion(CertificadoNoRetencionDTO dto) throws Exception {
+        Proveedor prov = buscarProveedorPorCuit(dto.getCuitProveedor());
+        if (prov == null) throw new ProveedorNoEncontradoException(dto.getCuitProveedor());
+
+        ImpuestoRetenible impuesto = Farmared.controller.impuestos.ControladorImpuestos.getInstance().buscarImpuestoPorNro(dto.getNroRetencion());
+        if (impuesto == null) throw new Exception("Impuesto no encontrado.");
+
+        CertificadoNoRetencion cert = new CertificadoNoRetencion(
+                impuesto, 
+                UtilDate.toDate(dto.getFechaInicio()), 
+                UtilDate.toDate(dto.getFechaVencimiento()), 
+                prov
+        );
+        prov.agregarCertificado(cert);
+    }
+
+    public CuentaCorrienteDTO obtenerCuentaCorrienteDTO(String cuit) {
+        Proveedor prov = buscarProveedorPorCuit(cuit);
+        if (prov == null) throw new ProveedorNoEncontradoException(cuit);
+
+        Farmared.model.cuentaCorriente.CuentaCorriente cc = prov.getCuentaCorriente();
+        
+        ArrayList<Farmared.dto.comprobante.ComprobanteDTO> comprobantesDTO = new ArrayList<>();
+        for (Farmared.model.comprobante.Comprobante comp : cc.getComprobantes()) {
+            String tipo = "Comprobante";
+            if (comp instanceof Farmared.model.comprobante.Factura) tipo = "Factura";
+            else if (comp instanceof Farmared.model.comprobante.NotaCredito) tipo = "Nota Crédito";
+            else if (comp instanceof Farmared.model.comprobante.NotaDebito) tipo = "Nota Débito";
+
+            comprobantesDTO.add(new Farmared.dto.comprobante.ComprobanteDTO(
+                    tipo, 
+                    comp.getNroComprobante(), 
+                    UtilDate.parseDate(comp.getFecha()), 
+                    comp.getTotal()
+            ));
+        }
+
+        return new CuentaCorrienteDTO(cc.getTopeDeuda(), cc.getDeudaActual(), comprobantesDTO);
+    }
+
+    public ArrayList<PrecioProveedorDTO> obtenerItemsPorProveedor(String cuit) {
+        Proveedor prov = buscarProveedorPorCuit(cuit);
+        if (prov == null) throw new ProveedorNoEncontradoException(cuit);
+
+        ArrayList<PrecioProveedorDTO> lista = new ArrayList<>();
+        for (PrecioProveedor pp : prov.getPrecioPorItem()) {
+            lista.add(new PrecioProveedorDTO(
+                    prov.getCuit(),
+                    prov.getRazonSocial(),
+                    pp.getItem().getCodigo(),
+                    pp.getItem().getDescripcionDeItem(),
+                    String.valueOf(pp.getPrecioItem()),
+                    UtilDate.parseDate(pp.getFecha())
+            ));
+        }
+        return lista;
     }
 
     // Bug 38 — registrarPrecioProveedor() usa métodos encapsulados
