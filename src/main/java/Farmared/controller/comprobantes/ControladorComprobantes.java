@@ -4,31 +4,22 @@ import Farmared.controller.item.ControladorProductosYServicios;
 import Farmared.controller.ordenes.ControladorDeOrdenDeCompra;
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.comprobante.*;
-import Farmared.dto.item.ItemDTO;
-import Farmared.dto.proveedor.ProveedorDTO;
-import Farmared.exception.ComprobanteNoEncontradoException;
 import Farmared.exception.FarmaredException;
 import Farmared.model.comprobante.*;
 import Farmared.model.item.Item;
+import Farmared.model.ordenCompra.EstadoOC;
 import Farmared.model.ordenCompra.OrdenDeCompra;
 import Farmared.model.proveedor.Proveedor;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 public class ControladorComprobantes {
     private static ControladorComprobantes instance = null;
 
-    private ArrayList<Factura> facturas;
-    private ArrayList<NotaCredito> notasDeCredito;
-    private ArrayList<NotaDebito> notasDeDebito;
-    private int contadorNroComprobante;
+    private ArrayList<Comprobante> comprobantes;
 
     private ControladorComprobantes() {
-        this.facturas = new ArrayList<>();
-        this.notasDeCredito = new ArrayList<>();
-        this.notasDeDebito = new ArrayList<>();
-        this.contadorNroComprobante = 1;
+        this.comprobantes = new ArrayList<>();
     }
 
     public synchronized static ControladorComprobantes getInstance() {
@@ -38,192 +29,264 @@ public class ControladorComprobantes {
         return instance;
     }
 
-    // --- FACTURAS ---
-    public FacturaDTO altaFactura(FacturaDTO dto) {
+    // =====================================================================
+    // REGISTRO DE FACTURAS
+    // Reglas:
+    //   - Sin OC -> PENDIENTE_AUTORIZACION, NO afecta CC
+    //   - Con OC y con desvíos -> PENDIENTE_AUTORIZACION, NO afecta CC
+    //   - Con OC y sin desvíos -> PENDIENTE, afecta CC (incrementa deuda)
+    // =====================================================================
+    public FacturaDTO registrarFactura(FacturaDTO dto) throws Exception {
         Proveedor proveedor = ControladorProveedores.getInstance().buscarProveedorModelo(dto.getCuitProveedor());
         if (proveedor == null) {
-            throw new FarmaredException("Proveedor no encontrado: " + dto.getCuitProveedor());
+            throw new FarmaredException("Error: El Proveedor con CUIT " + dto.getCuitProveedor() + " no existe");
         }
 
-        OrdenDeCompra oc = buscarOrdenDeCompra(dto.getNroOC());
-        TipoFactura tipoFactura = TipoFactura.valueOf(dto.getTipoFactura());
-        Date fecha = new Date();
-        
-        Factura factura = new Factura(contadorNroComprobante++, fecha, proveedor, dto.getDescripcion(), oc, tipoFactura);
-
-        if (dto.getDetalles() != null) {
-            for (DetalleComprobanteDTO detDTO : dto.getDetalles()) {
-                Item item = ControladorProductosYServicios.getInstance().buscarItemModeloPorCodigo(detDTO.getCodigoItem());
-                if (item != null) {
-                    DetalleComprobante det = new DetalleComprobante(item, detDTO.getCantidad(), detDTO.getPrecioUnitario());
-                    factura.agregarDetalle(det);
-                }
+        OrdenDeCompra oc = null;
+        if (dto.getNroOC() != null && !dto.getNroOC().trim().isEmpty()) {
+            oc = ControladorDeOrdenDeCompra.getInstance().buscarOrdenDeCompraModelo(dto.getNroOC());
+            if (oc == null) {
+                throw new FarmaredException("La orden de compra " + dto.getNroOC() + " no existe.");
+            }
+            if (!oc.getProveedor().getCuit().equals(proveedor.getCuit())) {
+                throw new FarmaredException("La orden de compra " + dto.getNroOC() + " no pertenece al proveedor seleccionado.");
             }
         }
 
-        facturas.add(factura);
-        proveedor.getCuentaCorriente().agregarComprobante(factura);
+        Factura factura = toModelFactura(dto);
 
-        return toDTO(factura);
-    }
-
-    public void modificarFactura(FacturaDTO dto) {
-        Factura factura = buscarFactura(dto.getNroComprobante());
-        if (factura == null) {
-            throw new ComprobanteNoEncontradoException(dto.getNroComprobante());
+        if (dto.getDetalles() != null) {
+            for (DetalleComprobanteDTO detDTO : dto.getDetalles()) {
+                Item item = ControladorProductosYServicios.getInstance().buscarItem(detDTO.getCodigoItem());
+                if (item == null) {
+                    throw new FarmaredException("Error: El ítem " + detDTO.getCodigoItem() + " de la factura no existe.");
+                }
+                DetalleComprobante detComp = new DetalleComprobante(item, detDTO.getCantidad(), detDTO.getPrecioUnitario());
+                factura.agregarDetalle(detComp);
+            }
         }
-        
-        factura.setDescripcion(dto.getDescripcion());
-        factura.setEstado(EstadoComprobante.valueOf(dto.getEstado()));
-    }
 
-    public FacturaDTO consultarFactura(int nroComprobante) {
-        Factura f = buscarFactura(nroComprobante);
-        if (f == null) {
-            throw new ComprobanteNoEncontradoException(nroComprobante);
+        factura.calcularTotalesYSubtotales();
+
+        // VALIDACIÓN: Exceso de tope de deuda
+        boolean excedeTope = false;
+        if (proveedor.getCuentaCorriente() != null) {
+            float deudaSimulada = proveedor.getCuentaCorriente().getDeudaActual() + factura.getTotal();
+            if (deudaSimulada > proveedor.getCuentaCorriente().getTopeDeuda()) {
+                excedeTope = true;
+            }
         }
-        return toDTO(f);
-    }
 
-    public ArrayList<FacturaDTO> obtenerFacturasDTO() {
-        ArrayList<FacturaDTO> list = new ArrayList<>();
-        for (Factura f : facturas) {
-            list.add(toDTO(f));
+        if (oc == null) {
+            // Sin OC -> compra directa, requiere autorización supervisora
+            factura.setEstado(EstadoComprobante.PENDIENTE_AUTORIZACION);
+        } else if (factura.tieneDesvios()) {
+            // Con OC pero con desvíos en ítems/precios -> requiere autorización
+            factura.setEstado(EstadoComprobante.PENDIENTE_AUTORIZACION);
+        } else if (excedeTope) {
+            // Excede el tope de la cuenta corriente -> requiere autorización
+            factura.setEstado(EstadoComprobante.PENDIENTE_AUTORIZACION);
+        } else {
+            // Con OC y sin desvíos ni excesos -> PENDIENTE
+            factura.setEstado(EstadoComprobante.PENDIENTE);
+            oc.setEstado(EstadoOC.CERRADA);
         }
-        return list;
+
+        this.comprobantes.add(factura);
+        if (proveedor.getCuentaCorriente() != null) {
+            proveedor.getCuentaCorriente().agregarComprobante(factura);
+            proveedor.getCuentaCorriente().recalcularDeuda();
+        }
+
+        return toDTOFactura(factura);
     }
 
-    // --- NOTAS DE CREDITO ---
-    public NotaCreditoDTO altaNotaDeCredito(NotaCreditoDTO dto) {
+    // =====================================================================
+    // REGISTRO DE NOTA DE CRÉDITO
+    // =====================================================================
+    public NotaCreditoDTO registrarNotaCredito(NotaCreditoDTO dto) throws Exception {
         Proveedor proveedor = ControladorProveedores.getInstance().buscarProveedorModelo(dto.getCuitProveedor());
         if (proveedor == null) {
-            throw new FarmaredException("Proveedor no encontrado: " + dto.getCuitProveedor());
+            throw new FarmaredException("Error: Proveedor no encontrado para la Nota de Crédito.");
         }
 
-        Factura facturaAsociada = buscarFactura(dto.getNroFacturaAsociada());
-        
-        NotaCredito nc = new NotaCredito(contadorNroComprobante++, new Date(), dto.getMonto(), proveedor, dto.getDescripcion(), facturaAsociada);
-        
-        // Si el monto de la Nota de Credito supera el tope de deuda del proveedor, requiere autorización.
-        if (dto.getMonto() > proveedor.getCuentaCorriente().getTopeDeuda()) {
-            nc.setEstado(EstadoComprobante.PENDIENTE_AUTORIZACION);
-            // No se agrega a la cuenta corriente hasta ser autorizada
-        } else {
-            nc.setEstado(EstadoComprobante.PENDIENTE);
-            proveedor.getCuentaCorriente().agregarComprobante(nc);
+        Factura facturaAsociada = null;
+        if (dto.getNroFacturaAsociada() != null && !dto.getNroFacturaAsociada().trim().isEmpty()) {
+            Comprobante comp = buscarComprobanteModelo(dto.getNroFacturaAsociada());
+            if (comp instanceof Factura) {
+                facturaAsociada = (Factura) comp;
+                if (!facturaAsociada.getProveedor().getCuit().equals(proveedor.getCuit())) {
+                    throw new FarmaredException("Error: La Factura asociada no pertenece al proveedor de la NC.");
+                }
+            } else {
+                throw new FarmaredException("Error: El comprobante " + dto.getNroFacturaAsociada() + " no es una Factura válida.");
+            }
         }
-        
-        notasDeCredito.add(nc);
+
+        NotaCredito nc = new NotaCredito(proveedor, dto.getDescripcion(), facturaAsociada, dto.getMonto());
+
+        if (facturaAsociada != null) {
+            nc.setEstado(EstadoComprobante.PENDIENTE);
+        } else {
+            nc.setEstado(EstadoComprobante.PENDIENTE_AUTORIZACION);
+        }
+
+        this.comprobantes.add(nc);
+        if (proveedor.getCuentaCorriente() != null) {
+            proveedor.getCuentaCorriente().agregarComprobante(nc);
+            proveedor.getCuentaCorriente().recalcularDeuda();
+        }
+
         return toDTO(nc);
     }
 
-    public void modificarNotaDeCredito(NotaCreditoDTO dto) {
-        NotaCredito nc = buscarNotaDeCredito(dto.getNroComprobante());
-        if (nc == null) {
-            throw new ComprobanteNoEncontradoException(dto.getNroComprobante());
-        }
-        nc.setDescripcion(dto.getDescripcion());
-        nc.setEstado(EstadoComprobante.valueOf(dto.getEstado()));
-    }
-
-    public void autorizarNotaDeCredito(int nroComprobante) {
-        NotaCredito nc = buscarNotaDeCredito(nroComprobante);
-        if (nc != null && nc.getEstado() == EstadoComprobante.PENDIENTE_AUTORIZACION) {
-            nc.setEstado(EstadoComprobante.AUTORIZADO);
-            nc.getProveedor().getCuentaCorriente().agregarComprobante(nc);
-        }
-    }
-
-    public ArrayList<NotaCreditoDTO> obtenerNotasDeCreditoDTO() {
-        ArrayList<NotaCreditoDTO> list = new ArrayList<>();
-        for (NotaCredito nc : notasDeCredito) {
-            list.add(toDTO(nc));
-        }
-        return list;
-    }
-
-    // --- NOTAS DE DEBITO ---
-    public NotaDebitoDTO altaNotaDeDebito(NotaDebitoDTO dto) {
+    // =====================================================================
+    // REGISTRO DE NOTA DE DÉBITO
+    // =====================================================================
+    public NotaDebitoDTO registrarNotaDebito(NotaDebitoDTO dto) throws Exception {
         Proveedor proveedor = ControladorProveedores.getInstance().buscarProveedorModelo(dto.getCuitProveedor());
         if (proveedor == null) {
-            throw new FarmaredException("Proveedor no encontrado: " + dto.getCuitProveedor());
+            throw new FarmaredException("Error: Proveedor no encontrado para la Nota de Débito.");
         }
-        
-        NotaDebito nd = new NotaDebito(contadorNroComprobante++, new Date(), dto.getMonto(), proveedor, dto.getDescripcion());
-        
-        proveedor.getCuentaCorriente().agregarComprobante(nd);
-        notasDeDebito.add(nd);
-        
+
+        Factura facturaAsociada = null;
+        if (dto.getNroFacturaAsociada() != null && !dto.getNroFacturaAsociada().trim().isEmpty()) {
+            Comprobante comp = buscarComprobanteModelo(dto.getNroFacturaAsociada());
+            if (comp instanceof Factura) {
+                facturaAsociada = (Factura) comp;
+                if (!facturaAsociada.getProveedor().getCuit().equals(proveedor.getCuit())) {
+                    throw new FarmaredException("Error: La Factura asociada no pertenece al proveedor de la ND.");
+                }
+            } else {
+                throw new FarmaredException("Error: El comprobante " + dto.getNroFacturaAsociada() + " no es una Factura válida.");
+            }
+        }
+
+        NotaDebito nd = new NotaDebito(proveedor, dto.getDescripcion(), dto.getMonto());
+
+        boolean excedeTope = false;
+        if (proveedor.getCuentaCorriente() != null) {
+            float deudaSimulada = proveedor.getCuentaCorriente().getDeudaActual() + dto.getMonto();
+            if (deudaSimulada > proveedor.getCuentaCorriente().getTopeDeuda()) {
+                excedeTope = true;
+            }
+        }
+
+        if (facturaAsociada != null && !excedeTope) {
+            nd.setEstado(EstadoComprobante.PENDIENTE);
+        } else {
+            nd.setEstado(EstadoComprobante.PENDIENTE_AUTORIZACION);
+        }
+
+        this.comprobantes.add(nd);
+        if (proveedor.getCuentaCorriente() != null) {
+            proveedor.getCuentaCorriente().agregarComprobante(nd);
+            proveedor.getCuentaCorriente().recalcularDeuda();
+        }
+
         return toDTO(nd);
     }
 
-    public void modificarNotaDeDebito(NotaDebitoDTO dto) {
-        NotaDebito nd = buscarNotaDeDebito(dto.getNroComprobante());
-        if (nd == null) {
-            throw new ComprobanteNoEncontradoException(dto.getNroComprobante());
+    // =====================================================================
+    // AUTORIZACIÓN (solo aplica a PENDIENTE_AUTORIZACION)
+    // =====================================================================
+    public void autorizarComprobante(String codigoComprobante) throws Exception {
+        Comprobante comp = buscarComprobanteModelo(codigoComprobante);
+        if (comp == null) {
+            throw new FarmaredException("Error: El comprobante " + codigoComprobante + " no existe.");
         }
-        nd.setDescripcion(dto.getDescripcion());
-        nd.setEstado(EstadoComprobante.valueOf(dto.getEstado()));
+        if (comp.getEstado() != EstadoComprobante.PENDIENTE_AUTORIZACION) {
+            throw new FarmaredException("El comprobante " + codigoComprobante +
+                " no está pendiente de autorización. Estado actual: " + comp.getEstado().name() + ".");
+        }
+
+        comp.setEstado(EstadoComprobante.AUTORIZADO);
+
+        if (comp instanceof Factura) {
+            Factura f = (Factura) comp;
+            if (f.getOrdenDeCompra() != null) {
+                f.getOrdenDeCompra().setEstado(EstadoOC.CERRADA);
+            }
+        }
+
+        Proveedor proveedor = comp.getProveedor();
+        if (proveedor.getCuentaCorriente() != null) {
+            // Ya está agregado, solo hace falta recalcular porque cambió de estado
+            proveedor.getCuentaCorriente().recalcularDeuda();
+        }
+    }
+
+    // =====================================================================
+    // BÚSQUEDA Y CONSULTA
+    // =====================================================================
+    public Comprobante buscarComprobanteModelo(String codigo) {
+        if (codigo == null || codigo.isEmpty()) return null;
+        for (Comprobante c : comprobantes) {
+            if (c.getNroComprobante().equals(codigo)) return c;
+        }
+        return null;
+    }
+
+    public void modificarFactura(FacturaDTO dto) throws Exception {
+        Comprobante comp = buscarComprobanteModelo(dto.getNroComprobante());
+        if (comp instanceof Factura) {
+            ((Factura) comp).setDescripcion(dto.getDescripcion());
+        } else {
+            throw new FarmaredException("Error: La factura con código " + dto.getNroComprobante() + " no existe.");
+        }
+    }
+
+    public void modificarNotaDeDebito(NotaDebitoDTO dto) throws Exception {
+        Comprobante comp = buscarComprobanteModelo(dto.getNroComprobante());
+        if (comp instanceof NotaDebito) {
+            ((NotaDebito) comp).setDescripcion(dto.getDescripcion());
+        } else {
+            throw new FarmaredException("Error: La Nota de Débito con código " + dto.getNroComprobante() + " no existe.");
+        }
+    }
+
+    public ArrayList<FacturaDTO> obtenerFacturasDTO() {
+        ArrayList<FacturaDTO> listaDTO = new ArrayList<>();
+        for (Comprobante c : this.comprobantes) {
+            if (c instanceof Factura) listaDTO.add(toDTOFactura((Factura) c));
+        }
+        return listaDTO;
     }
 
     public ArrayList<NotaDebitoDTO> obtenerNotasDeDebitoDTO() {
-        ArrayList<NotaDebitoDTO> list = new ArrayList<>();
-        for (NotaDebito nd : notasDeDebito) {
-            list.add(toDTO(nd));
+        ArrayList<NotaDebitoDTO> listaDTO = new ArrayList<>();
+        for (Comprobante c : this.comprobantes) {
+            if (c instanceof NotaDebito) listaDTO.add(toDTO((NotaDebito) c));
         }
-        return list;
+        return listaDTO;
     }
 
-    // --- COMBO HELPERS FOR VISTAS ---
-    public ArrayList<ProveedorDTO> obtenerProveedoresParaCombo() {
-        return ControladorProveedores.getInstance().obtenerProveedoresDTO();
-    }
-
-    public ArrayList<ItemDTO> obtenerItemsParaCombo() {
-        ArrayList<ItemDTO> items = new ArrayList<>();
-        items.addAll(ControladorProductosYServicios.getInstance().obtenerSoloProductos());
-        items.addAll(ControladorProductosYServicios.getInstance().obtenerSoloServicios());
-        return items;
-    }
-
-    // --- INTERNAL METHODS ---
-    private Factura buscarFactura(int nro) {
-        for (Factura f : facturas) {
-            if (f.getNroComprobante() == nro) return f;
+    public ArrayList<NotaCreditoDTO> obtenerNotasDeCreditoDTO() {
+        ArrayList<NotaCreditoDTO> listaDTO = new ArrayList<>();
+        for (Comprobante c : this.comprobantes) {
+            if (c instanceof NotaCredito) listaDTO.add(toDTO((NotaCredito) c));
         }
-        return null;
+        return listaDTO;
     }
 
-    private NotaCredito buscarNotaDeCredito(int nro) {
-        for (NotaCredito nc : notasDeCredito) {
-            if (nc.getNroComprobante() == nro) return nc;
+    public FacturaDTO consultarFactura(String codigo) {
+        for (Comprobante comp : comprobantes) {
+            if (comp instanceof Factura && comp.getNroComprobante().equals(codigo)) {
+                return toDTOFactura((Factura) comp);
+            }
         }
-        return null;
+        throw new FarmaredException("No se encontró la factura con código: " + codigo);
     }
 
-    private NotaDebito buscarNotaDeDebito(int nro) {
-        for (NotaDebito nd : notasDeDebito) {
-            if (nd.getNroComprobante() == nro) return nd;
-        }
-        return null;
-    }
-
-    private OrdenDeCompra buscarOrdenDeCompra(String nroOC) {
-        if (nroOC == null || nroOC.isEmpty()) return null;
-        for (OrdenDeCompra oc : ControladorDeOrdenDeCompra.getInstance().getOrdenesDeCompra()) {
-            if (oc.getNroOC().equals(nroOC)) return oc;
-        }
-        return null;
-    }
-
-    // --- TO DTO METHODS ---
-    private FacturaDTO toDTO(Factura f) {
+    // =====================================================================
+    // CONVERSIONES MODEL <-> DTO
+    // =====================================================================
+    private FacturaDTO toDTOFactura(Factura f) {
         String nroOC = f.getOrdenDeCompra() != null ? f.getOrdenDeCompra().getNroOC() : "";
         ArrayList<DetalleComprobanteDTO> detDTOs = new ArrayList<>();
         for (DetalleComprobante d : f.getDetalles()) {
             detDTOs.add(toDTO(d));
         }
-        
         return new FacturaDTO(
             f.getNroComprobante(),
             Farmared.utils.UtilDate.parseDate(f.getFecha()),
@@ -238,10 +301,16 @@ public class ControladorComprobantes {
         );
     }
 
+    private Factura toModelFactura(FacturaDTO dto) throws Exception {
+        Proveedor proveedor = ControladorProveedores.getInstance().buscarProveedorModelo(dto.getCuitProveedor());
+        OrdenDeCompra oc = ControladorDeOrdenDeCompra.getInstance().buscarOrdenDeCompraModelo(dto.getNroOC());
+        TipoFactura tipoFactura = TipoFactura.valueOf(dto.getTipoFactura());
+        return new Factura(proveedor, dto.getDescripcion(), oc, tipoFactura);
+    }
+
     private NotaCreditoDTO toDTO(NotaCredito nc) {
-        int nroFac = nc.getFacturaAsociada() != null ? nc.getFacturaAsociada().getNroComprobante() : 0;
+        String nroFac = nc.getFacturaAsociada() != null ? nc.getFacturaAsociada().getNroComprobante() : "";
         boolean requiere = nc.getEstado() == EstadoComprobante.PENDIENTE_AUTORIZACION;
-        
         return new NotaCreditoDTO(
             nc.getNroComprobante(),
             Farmared.utils.UtilDate.parseDate(nc.getFecha()),

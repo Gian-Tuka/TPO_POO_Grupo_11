@@ -3,7 +3,7 @@ package Farmared.dto.comprobante;
 import java.util.ArrayList;
 
 public class FacturaDTO {
-    private int nroComprobante;
+    private String nroComprobante;
     private String fecha;
     private String cuitProveedor;
     private String razonSocialProveedor;
@@ -24,7 +24,7 @@ public class FacturaDTO {
     }
 
     // Constructor para vista
-    public FacturaDTO(int nroComprobante, String fecha, String cuitProveedor, String razonSocialProveedor, String descripcion, float montoTotal, String estado, String nroOC, ArrayList<DetalleComprobanteDTO> detalles, String tipoFactura) {
+    public FacturaDTO(String nroComprobante, String fecha, String cuitProveedor, String razonSocialProveedor, String descripcion, float montoTotal, String estado, String nroOC, ArrayList<DetalleComprobanteDTO> detalles, String tipoFactura) {
         this.nroComprobante = nroComprobante;
         this.fecha = fecha;
         this.cuitProveedor = cuitProveedor;
@@ -37,7 +37,7 @@ public class FacturaDTO {
         this.tipoFactura = tipoFactura;
     }
 
-    public int getNroComprobante() { return nroComprobante; }
+    public String getNroComprobante() { return nroComprobante; }
     public String getFecha() { return fecha; }
     public String getCuitProveedor() { return cuitProveedor; }
     public String getRazonSocialProveedor() { return razonSocialProveedor; }
@@ -48,7 +48,7 @@ public class FacturaDTO {
     public ArrayList<DetalleComprobanteDTO> getDetalles() { return detalles; }
     public String getTipoFactura() { return tipoFactura; }
 
-    public void setNroComprobante(int nroComprobante) { this.nroComprobante = nroComprobante; }
+    public void setNroComprobante(String nroComprobante) { this.nroComprobante = nroComprobante; }
     public void setFecha(String fecha) { this.fecha = fecha; }
     public void setCuitProveedor(String cuitProveedor) { this.cuitProveedor = cuitProveedor; }
     public void setRazonSocialProveedor(String razonSocialProveedor) { this.razonSocialProveedor = razonSocialProveedor; }

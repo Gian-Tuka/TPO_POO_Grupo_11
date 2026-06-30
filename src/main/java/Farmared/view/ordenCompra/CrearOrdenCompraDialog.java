@@ -3,8 +3,8 @@ package Farmared.view.ordenCompra;
 import Farmared.controller.ordenes.ControladorDeOrdenDeCompra;
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.item.ItemDTO;
-import Farmared.dto.ordenes.DetalleItemDTO;
-import Farmared.dto.ordenes.OrdenDeCompraDTO;
+import Farmared.dto.ordenesDeCompra.DetalleItemDTO;
+import Farmared.dto.ordenesDeCompra.OrdenDeCompraDTO;
 import Farmared.dto.proveedor.ProveedorDTO;
 
 import javax.swing.*;

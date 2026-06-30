@@ -1,171 +1,359 @@
 package Farmared.view.comprobantesGUI;
 
 import Farmared.controller.comprobantes.ControladorComprobantes;
+import Farmared.controller.ordenes.ControladorDeOrdenDeCompra;
+import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.comprobante.DetalleComprobanteDTO;
 import Farmared.dto.comprobante.FacturaDTO;
-import Farmared.dto.item.ItemDTO;
+import Farmared.dto.item.PrecioProveedorDTO;
+import Farmared.dto.ordenesDeCompra.DetalleOCDTO;
+import Farmared.dto.ordenesDeCompra.OrdenDeCompraDTO;
 import Farmared.dto.proveedor.ProveedorDTO;
 import Farmared.model.comprobante.TipoFactura;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class VistaAltaFactura extends JDialog {
 
     private JComboBox<String> comboProveedores;
     private ArrayList<ProveedorDTO> listaProveedores;
+
+    private JComboBox<String> comboOC;
+    private ArrayList<OrdenDeCompraDTO> listaOCDelProveedor;
+
     private JTextField txtDescripcion;
-    private JTextField txtNroOC;
+    private JCheckBox chkCompraDirecta;
     private JComboBox<TipoFactura> comboTipoFactura;
-    
+
     private JTable tablaDetalles;
     private DefaultTableModel modeloDetalles;
     private ArrayList<DetalleComprobanteDTO> detallesActuales;
 
+    private JButton btnAgregarItem;
+    private JButton btnEditarItem;
+    private JButton btnEliminarItem;
+
     public VistaAltaFactura(JFrame parent) {
         super(parent, "Alta de Factura", true);
-        setSize(700, 600);
+        setSize(800, 650);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
-        getContentPane().setBackground(new Color(245, 245, 250));
+        getContentPane().setBackground(Color.WHITE);
 
         detallesActuales = new ArrayList<>();
 
-        // --- FORMULARIO NORTE ---
-        JPanel panelForm = new JPanel(new GridBagLayout());
-        panelForm.setBackground(new Color(245, 245, 250));
-        panelForm.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        // Header
+        JPanel panelHeader = new JPanel(new BorderLayout());
+        panelHeader.setBackground(new Color(52, 152, 219));
+        panelHeader.setBorder(new EmptyBorder(15, 20, 15, 20));
+        JLabel lblTitulo = new JLabel("Nueva Factura de Proveedor");
+        lblTitulo.setForeground(Color.WHITE);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        panelHeader.add(lblTitulo, BorderLayout.WEST);
+        add(panelHeader, BorderLayout.NORTH);
 
-        listaProveedores = ControladorComprobantes.getInstance().obtenerProveedoresParaCombo();
+        // Formulario con BoxLayout (sin GridBagLayout)
+        JPanel panelForm = new JPanel();
+        panelForm.setLayout(new BoxLayout(panelForm, BoxLayout.Y_AXIS));
+        panelForm.setBackground(Color.WHITE);
+        panelForm.setBorder(new EmptyBorder(15, 20, 10, 20));
+
+        listaProveedores = ControladorProveedores.getInstance().obtenerProveedoresDTO();
         comboProveedores = new JComboBox<>();
+        comboProveedores.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        comboProveedores.addItem("Seleccione un Proveedor...");
         for (ProveedorDTO p : listaProveedores) {
-            comboProveedores.addItem(p.getRazonSocial() + " (" + p.getCuit() + ")");
+            comboProveedores.addItem(p.getRazonSocial() + " (CUIT: " + p.getCuit() + ")");
         }
+        comboProveedores.addActionListener(e -> actualizarOCs());
 
-        txtDescripcion = new JTextField(20);
-        txtNroOC = new JTextField(10);
+        chkCompraDirecta = new JCheckBox("Es Compra Directa (Sin OC previa)");
+        chkCompraDirecta.setBackground(Color.WHITE);
+        chkCompraDirecta.addActionListener(e -> alternarModoCompra());
+
+        listaOCDelProveedor = new ArrayList<>();
+        comboOC = new JComboBox<>();
+        comboOC.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        comboOC.setEnabled(false);
+        comboOC.addActionListener(e -> cargarItemsDeOC());
+
         comboTipoFactura = new JComboBox<>(TipoFactura.values());
+        comboTipoFactura.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
 
-        gbc.gridx = 0; gbc.gridy = 0; panelForm.add(new JLabel("Proveedor:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; panelForm.add(comboProveedores, gbc);
+        txtDescripcion = new JTextField();
+        txtDescripcion.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
 
-        gbc.gridx = 0; gbc.gridy = 1; panelForm.add(new JLabel("Descripción:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; panelForm.add(txtDescripcion, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 2; panelForm.add(new JLabel("Nro OC:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; panelForm.add(txtNroOC, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 3; panelForm.add(new JLabel("Tipo Factura:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; panelForm.add(comboTipoFactura, gbc);
+        panelForm.add(crearFila("Proveedor:", comboProveedores));
+        panelForm.add(Box.createVerticalStrut(8));
+        panelForm.add(chkCompraDirecta);
+        panelForm.add(Box.createVerticalStrut(8));
+        panelForm.add(crearFila("Orden de Compra:", comboOC));
+        panelForm.add(Box.createVerticalStrut(8));
+        panelForm.add(crearFila("Tipo Factura:", comboTipoFactura));
+        panelForm.add(Box.createVerticalStrut(8));
+        panelForm.add(crearFila("Descripción:", txtDescripcion));
 
         add(panelForm, BorderLayout.NORTH);
 
-        // --- DETALLES CENTRO ---
-        JPanel panelDetalles = new JPanel(new BorderLayout());
-        panelDetalles.setBorder(BorderFactory.createTitledBorder("Detalles de Factura"));
-        
-        String[] colDetalles = {"Código", "Descripción", "Cantidad", "Precio Unit.", "Subtotal"};
-        modeloDetalles = new DefaultTableModel(colDetalles, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+        // Tabla de ítems de la factura
+        JPanel panelTablaContenedor = new JPanel(new BorderLayout());
+        panelTablaContenedor.setBorder(new EmptyBorder(0, 20, 10, 20));
+        panelTablaContenedor.setBackground(Color.WHITE);
+
+        modeloDetalles = new DefaultTableModel(
+                new Object[]{"Código Ítem", "Descripción", "Cantidad", "Precio Unitario", "Subtotal"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
         };
         tablaDetalles = new JTable(modeloDetalles);
-        panelDetalles.add(new JScrollPane(tablaDetalles), BorderLayout.CENTER);
+        tablaDetalles.setRowHeight(25);
+        tablaDetalles.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        tablaDetalles.getTableHeader().setBackground(new Color(245, 245, 250));
+        panelTablaContenedor.add(new JScrollPane(tablaDetalles), BorderLayout.CENTER);
 
-        JPanel panelBotonesDetalle = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnAgregarDetalle = new JButton("Agregar Línea");
-        btnAgregarDetalle.addActionListener(e -> abrirDialogoDetalle());
-        panelBotonesDetalle.add(btnAgregarDetalle);
-        panelDetalles.add(panelBotonesDetalle, BorderLayout.SOUTH);
+        JPanel panelTablaBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        panelTablaBotones.setBackground(Color.WHITE);
 
-        add(panelDetalles, BorderLayout.CENTER);
+        btnAgregarItem = new JButton("Agregar Ítem");
+        btnAgregarItem.setEnabled(false);
+        btnAgregarItem.addActionListener(e -> agregarItemDirecto());
 
-        // --- BOTONES SUR ---
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnGuardar = new JButton("Guardar");
-        btnGuardar.setBackground(new Color(46, 204, 113));
-        btnGuardar.setForeground(Color.BLACK);
-        btnGuardar.addActionListener(e -> guardarFactura());
+        btnEditarItem = new JButton("Editar Ítem Seleccionado");
+        btnEditarItem.addActionListener(e -> editarItem());
+
+        btnEliminarItem = new JButton("Quitar Ítem");
+        btnEliminarItem.addActionListener(e -> quitarItem());
+
+        panelTablaBotones.add(btnAgregarItem);
+        panelTablaBotones.add(btnEditarItem);
+        panelTablaBotones.add(btnEliminarItem);
+        panelTablaContenedor.add(panelTablaBotones, BorderLayout.SOUTH);
+
+        add(panelTablaContenedor, BorderLayout.CENTER);
+
+        // Botones guardar / cancelar
+        JPanel panelAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+        panelAcciones.setBackground(new Color(245, 245, 250));
+        panelAcciones.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(220, 224, 230)));
 
         JButton btnCancelar = new JButton("Cancelar");
+        btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnCancelar.setBackground(new Color(231, 76, 60));
-        btnCancelar.setForeground(Color.BLACK);
+        btnCancelar.setForeground(Color.WHITE);
+        btnCancelar.setFocusPainted(false);
         btnCancelar.addActionListener(e -> dispose());
 
-        panelBotones.add(btnGuardar);
-        panelBotones.add(btnCancelar);
-        add(panelBotones, BorderLayout.SOUTH);
+        JButton btnGridGuardar = new JButton("Registrar Factura");
+        btnGridGuardar.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnGridGuardar.setBackground(new Color(46, 204, 113));
+        btnGridGuardar.setForeground(Color.WHITE);
+        btnGridGuardar.setFocusPainted(false);
+        btnGridGuardar.addActionListener(e -> guardarFactura());
+
+        panelAcciones.add(btnCancelar);
+        panelAcciones.add(btnGridGuardar);
+        add(panelAcciones, BorderLayout.SOUTH);
     }
 
-    private void abrirDialogoDetalle() {
-        JDialog diag = new JDialog(this, "Agregar Detalle", true);
-        diag.setSize(400, 250);
-        diag.setLocationRelativeTo(this);
-        diag.setLayout(new GridBagLayout());
-        
-        ArrayList<ItemDTO> items = ControladorComprobantes.getInstance().obtenerItemsParaCombo();
-        JComboBox<String> comboItems = new JComboBox<>();
-        for (ItemDTO it : items) {
-            comboItems.addItem(it.getDescripcionDeItem() + " (" + it.getCodigo() + ")");
+    // Helper para crear una fila etiqueta + campo
+    private JPanel crearFila(String etiqueta, JComponent campo) {
+        JPanel fila = new JPanel(new BorderLayout(10, 0));
+        fila.setBackground(Color.WHITE);
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        JLabel lbl = new JLabel(etiqueta);
+        lbl.setPreferredSize(new Dimension(160, 35));
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        fila.add(lbl, BorderLayout.WEST);
+        fila.add(campo, BorderLayout.CENTER);
+        return fila;
+    }
+
+    // Al cambiar proveedor, actualizar lista de OCs disponibles
+    private void actualizarOCs() {
+        int idx = comboProveedores.getSelectedIndex();
+        comboOC.removeAllItems();
+        listaOCDelProveedor.clear();
+        detallesActuales.clear();
+        actualizarTabla();
+
+        if (idx <= 0 || chkCompraDirecta.isSelected()) {
+            comboOC.setEnabled(false);
+            return;
         }
 
-        JTextField txtCant = new JTextField("1", 5);
-        JTextField txtPrecio = new JTextField("0.0", 8);
+        String cuit = listaProveedores.get(idx - 1).getCuit();
+        ArrayList<OrdenDeCompraDTO> todas = ControladorDeOrdenDeCompra.getInstance().obtenerOrdenesDeCompraDTO();
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5,5,5,5);
-        gbc.gridx=0; gbc.gridy=0; diag.add(new JLabel("Item:"), gbc);
-        gbc.gridx=1; diag.add(comboItems, gbc);
-        
-        gbc.gridx=0; gbc.gridy=1; diag.add(new JLabel("Cantidad:"), gbc);
-        gbc.gridx=1; diag.add(txtCant, gbc);
-        
-        gbc.gridx=0; gbc.gridy=2; diag.add(new JLabel("Precio Unitario:"), gbc);
-        gbc.gridx=1; diag.add(txtPrecio, gbc);
+        listaOCDelProveedor = (ArrayList<OrdenDeCompraDTO>) todas.stream()
+                .filter(oc -> oc.getCuitProveedor().equals(cuit) &&
+                        (oc.getEstado().equals("APROBADA") || oc.getEstado().equals("APROBADA_AUTORIZACION")))
+                .collect(Collectors.toList());
 
-        JButton btnOk = new JButton("Agregar");
-        btnOk.addActionListener(e -> {
-            try {
-                int cant = Integer.parseInt(txtCant.getText());
-                float precio = Float.parseFloat(txtPrecio.getText());
-                int idx = comboItems.getSelectedIndex();
-                if (idx >= 0) {
-                    ItemDTO sel = items.get(idx);
-                    DetalleComprobanteDTO det = new DetalleComprobanteDTO(sel.getCodigo(), cant, precio);
-                    detallesActuales.add(det);
-                    modeloDetalles.addRow(new Object[]{sel.getCodigo(), sel.getDescripcionDeItem(), cant, precio, cant * precio});
-                    diag.dispose();
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(diag, "Valores numéricos inválidos.");
+        comboOC.addItem("Seleccione una OC...");
+        for (OrdenDeCompraDTO oc : listaOCDelProveedor) {
+            comboOC.addItem(oc.getNroOC() + " - Total: $" + oc.getTotal() + " (" + oc.getEstado() + ")");
+        }
+        comboOC.setEnabled(true);
+    }
+
+    // Al elegir una OC, autocompletar la tabla con sus ítems y precios
+    private void cargarItemsDeOC() {
+        int idx = comboOC.getSelectedIndex();
+        detallesActuales.clear();
+
+        if (idx > 0) {
+            OrdenDeCompraDTO oc = listaOCDelProveedor.get(idx - 1);
+            for (DetalleOCDTO detOC : oc.getDetalles()) {
+                detallesActuales.add(new DetalleComprobanteDTO(
+                        detOC.getCodigoItem(),
+                        detOC.getDescripcionItem(),
+                        detOC.getCantidad(),
+                        detOC.getPrecioUnitario(),
+                        detOC.getSubtotal()
+                ));
             }
-        });
+        }
+        actualizarTabla();
+    }
 
-        gbc.gridx=1; gbc.gridy=3; diag.add(btnOk, gbc);
-        diag.setVisible(true);
+    // Alternar entre modo OC y Compra Directa
+    private void alternarModoCompra() {
+        boolean esDirecta = chkCompraDirecta.isSelected();
+        comboOC.setEnabled(!esDirecta);
+        btnAgregarItem.setEnabled(esDirecta);
+        btnEliminarItem.setEnabled(esDirecta);
+
+        if (esDirecta) {
+            comboOC.removeAllItems();
+            detallesActuales.clear();
+            actualizarTabla();
+        } else {
+            actualizarOCs();
+        }
+    }
+
+    // Agregar ítem manualmente en modo compra directa
+    private void agregarItemDirecto() {
+        int idxProv = comboProveedores.getSelectedIndex();
+        if (idxProv <= 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione un proveedor primero.");
+            return;
+        }
+        String cuit = listaProveedores.get(idxProv - 1).getCuit();
+        ArrayList<PrecioProveedorDTO> precios = ControladorProveedores.getInstance().obtenerItemsPorProveedor(cuit);
+
+        DialogoSeleccionarItem dialog = new DialogoSeleccionarItem(this, precios);
+        dialog.setVisible(true);
+
+        DetalleComprobanteDTO nuevo = dialog.getDetalleSeleccionado();
+        if (nuevo != null) {
+            detallesActuales.add(nuevo);
+            actualizarTabla();
+        }
+    }
+
+    // Editar cantidad/precio de un ítem (genera desvío si difiere de OC)
+    private void editarItem() {
+        int row = tablaDetalles.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione un ítem de la tabla para editar.");
+            return;
+        }
+
+        DetalleComprobanteDTO det = detallesActuales.get(row);
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JTextField txtCant = new JTextField(String.valueOf(det.getCantidad()));
+        JTextField txtPrecio = new JTextField(String.valueOf(det.getPrecioUnitario()));
+
+        panel.add(new JLabel("Nueva Cantidad:"));
+        panel.add(txtCant);
+        panel.add(new JLabel("Nuevo Precio Unitario ($):"));
+        panel.add(txtPrecio);
+
+        int res = JOptionPane.showConfirmDialog(this, panel, "Editar - " + det.getDescripcionItem(), JOptionPane.OK_CANCEL_OPTION);
+        if (res == JOptionPane.OK_OPTION) {
+            try {
+                int c = Integer.parseInt(txtCant.getText().trim());
+                float p = Float.parseFloat(txtPrecio.getText().trim());
+                if (c <= 0 || p < 0) throw new NumberFormatException();
+                det.setCantidad(c);
+                det.setPrecioUnitario(p);
+                det.setSubTotal(c * p);
+                actualizarTabla();
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Valores inválidos.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void quitarItem() {
+        int row = tablaDetalles.getSelectedRow();
+        if (row >= 0) {
+            detallesActuales.remove(row);
+            actualizarTabla();
+        }
+    }
+
+    private void actualizarTabla() {
+        modeloDetalles.setRowCount(0);
+        for (DetalleComprobanteDTO d : detallesActuales) {
+            modeloDetalles.addRow(new Object[]{
+                    d.getCodigoItem(),
+                    d.getDescripcionItem(),
+                    d.getCantidad(),
+                    d.getPrecioUnitario(),
+                    d.getSubTotal()
+            });
+        }
     }
 
     private void guardarFactura() {
-        int idx = comboProveedores.getSelectedIndex();
-        if (idx < 0) return;
-        
-        String cuit = listaProveedores.get(idx).getCuit();
-        String desc = txtDescripcion.getText();
-        String oc = txtNroOC.getText();
-        String tipo = comboTipoFactura.getSelectedItem().toString();
+        int idxProv = comboProveedores.getSelectedIndex();
+        if (idxProv <= 0) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un proveedor.");
+            return;
+        }
 
-        FacturaDTO dto = new FacturaDTO(cuit, desc, oc, detallesActuales, tipo);
-        
+        String cuit = listaProveedores.get(idxProv - 1).getCuit();
+        String desc = txtDescripcion.getText().trim();
+        String tipo = comboTipoFactura.getSelectedItem().toString();
+        String nroOC = "";
+
+        if (!chkCompraDirecta.isSelected()) {
+            int idxOC = comboOC.getSelectedIndex();
+            if (idxOC <= 0) {
+                JOptionPane.showMessageDialog(this, "Debe seleccionar una Orden de Compra o marcar Compra Directa.");
+                return;
+            }
+            nroOC = listaOCDelProveedor.get(idxOC - 1).getNroOC();
+        }
+
+        if (detallesActuales.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Debe haber al menos un ítem en la factura.");
+            return;
+        }
+
+        FacturaDTO dto = new FacturaDTO(cuit, desc, nroOC, detallesActuales, tipo);
+
         try {
-            ControladorComprobantes.getInstance().altaFactura(dto);
-            JOptionPane.showMessageDialog(this, "Factura creada exitosamente.");
+            FacturaDTO resultado = ControladorComprobantes.getInstance().registrarFactura(dto);
+            String estado = resultado.getEstado();
+            String msg = "Factura registrada con éxito.\nEstado: " + estado;
+            if (estado.equals("PENDIENTE_AUTORIZACION")) {
+                msg += "\n⚠ Requiere autorización de supervisor (compra directa o desvíos detectados).";
+            } else {
+                msg += "\n✓ Impactó en la Cuenta Corriente del proveedor.";
+            }
+            JOptionPane.showMessageDialog(this, msg, "Resultado", JOptionPane.INFORMATION_MESSAGE);
             dispose();
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al crear factura: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al registrar Factura: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

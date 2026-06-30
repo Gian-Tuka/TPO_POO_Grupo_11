@@ -78,7 +78,7 @@ public class VistaAltaItem extends JDialog {
 
         // Listeners
         btnNuevaUDM.addActionListener(e -> {
-            VistaABMUnidadDeMedida vistaUDM = new VistaABMUnidadDeMedida(this);
+            VistaAltaUnidadDeMedida vistaUDM = new VistaAltaUnidadDeMedida(this);
             vistaUDM.setVisible(true);
             cargarCombos(); // Refrescar UDM después de crear
         });
@@ -132,7 +132,7 @@ public class VistaAltaItem extends JDialog {
                     udmSeleccionada.getDescripcionUnidad(),
                     udmSeleccionada.getCodigoUnidad(),
                     comboIVA.getSelectedItem().toString(),
-                    comboRubro.getSelectedItem().toString()
+                    comboRubro.getSelectedItem().toString().trim()
             );
             dto.setTipoItem(tipoItem);
 

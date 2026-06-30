@@ -1,6 +1,8 @@
 package Farmared.model.pago;
 
+import Farmared.model.impuesto.ImpuestoRetenible;
 import Farmared.model.proveedor.Proveedor;
+import Farmared.utils.GeneradorDeCodigos;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,77 +10,63 @@ import java.util.Date;
 import java.util.List;
 
 public class OrdenDePago {
-    private int nroOP;
-    private Date fechaEmision;
+    private String nroOP;
     private Proveedor proveedor;
-    private float totalBruto;
-    private float totalRetenciones;
-    private float totalNeto;
-    private List<DetalleCancelacion> detallesCancelacion;
-    private List<FormaDePago> formasDePago;
+    private Date fecha;
+    private ArrayList<DetalleCancelacion> comprobantesCancelados;
+    private float totalNetoOP;
+    private ArrayList<ImpuestoRetenible> retencionesEfectuadas;
+    private ArrayList<FormaDePago> formasDePago;
 
-    public OrdenDePago(int nroOP, Date fechaEmision, Proveedor proveedor) {
-        this.nroOP = nroOP;
-        this.fechaEmision = fechaEmision;
+    public OrdenDePago(Proveedor proveedor) {
         this.proveedor = proveedor;
-        this.totalBruto = 0f;
-        this.totalRetenciones = 0f;
-        this.totalNeto = 0f;
-        this.detallesCancelacion = new ArrayList<>();
+
+        this.nroOP = generarNroOP();
+        this.fecha = generarFecha();
+        this.comprobantesCancelados = new ArrayList<>();
+        this.retencionesEfectuadas = new ArrayList<>();
         this.formasDePago = new ArrayList<>();
+        this.totalNetoOP = 0f;
+}
+    private String generarNroOP() {
+        GeneradorDeCodigos gdc = new GeneradorDeCodigos();
+        return gdc.generarCodigo("OP", 4);
+    }
+    private Date generarFecha() {
+        return new Date();
     }
 
-    public void agregarDetalleCancelacion(DetalleCancelacion detalle) {
-        this.detallesCancelacion.add(detalle);
-        this.totalBruto += detalle.getMontoCancelado();
-        calcularTotalNeto();
+
+    public void agregarComprobanteCancelado(DetalleCancelacion detalle) {
+        this.comprobantesCancelados.add(detalle);
     }
 
-    public void agregarFormaDePago(FormaDePago formaDePago) {
-        this.formasDePago.add(formaDePago);
+    public void agregarRetencion(ImpuestoRetenible impuesto) {
+        this.retencionesEfectuadas.add(impuesto);
     }
 
-    public float calcularTotalNeto() {
-        this.totalNeto = this.totalBruto - this.totalRetenciones;
-        return this.totalNeto;
+    public void agregarFormaDePago(FormaDePago forma) {
+        this.formasDePago.add(forma);
     }
 
-    // Getters
-    public int getNroOP() {
-        return nroOP;
+    public void setTotalNetoOP(float total) {
+        this.totalNetoOP = total;
     }
 
-    public Date getFechaEmision() {
-        return fechaEmision;
+    public float calcularTotalFormasDePago() {
+        float total = 0f;
+        for (FormaDePago fp : formasDePago) {
+            total += fp.getMonto();
+        }
+        return total;
     }
 
-    public Proveedor getProveedor() {
-        return proveedor;
-    }
 
-    public float getTotalBruto() {
-        return totalBruto;
-    }
-
-    public float getTotalRetenciones() {
-        return totalRetenciones;
-    }
-
-    public float getTotalNeto() {
-        return totalNeto;
-    }
-
-    public List<DetalleCancelacion> getDetallesCancelacion() {
-        return Collections.unmodifiableList(detallesCancelacion);
-    }
-
-    public List<FormaDePago> getFormasDePago() {
-        return Collections.unmodifiableList(formasDePago);
-    }
-
-    // Setters
-    public void setTotalRetenciones(float totalRetenciones) {
-        this.totalRetenciones = totalRetenciones;
-        calcularTotalNeto();
-    }
+    public String getNroOP() { return nroOP; }
+    public Proveedor getProveedor() { return proveedor; }
+    public Date getFecha() { return fecha; }
+    public List<DetalleCancelacion> getComprobantesCancelados() { return comprobantesCancelados; }
+    public float getTotalNetoOP() { return totalNetoOP; }
+    public List<ImpuestoRetenible> getRetencionesEfectuadas() { return retencionesEfectuadas; }
+    public List<FormaDePago> getFormaDePago() { return formasDePago; }
 }

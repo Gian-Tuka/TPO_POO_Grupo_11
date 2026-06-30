@@ -1,4 +1,4 @@
-package Farmared.dto.ordenes;
+package Farmared.dto.ordenesDeCompra;
 
 import java.util.ArrayList;
 import java.util.List;

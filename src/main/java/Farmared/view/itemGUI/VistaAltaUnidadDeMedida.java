@@ -7,13 +7,13 @@ import Farmared.utils.Validations;
 import javax.swing.*;
 import java.awt.*;
 
-public class VistaABMUnidadDeMedida extends JDialog {
+public class VistaAltaUnidadDeMedida extends JDialog {
 
     private JTextField txtDescripcion;
     private JComboBox<String> comboTipo;
     private JButton btnRegistrar;
 
-    public VistaABMUnidadDeMedida(Window parent) {
+    public VistaAltaUnidadDeMedida(Window parent) {
         super(parent, "Nueva Unidad de Medida", ModalityType.APPLICATION_MODAL);
         setSize(300, 200);
         setLocationRelativeTo(parent);

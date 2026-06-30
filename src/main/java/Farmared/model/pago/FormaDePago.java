@@ -6,9 +6,9 @@ public abstract class FormaDePago {
     protected float monto;
     protected Date fecha;
 
-    public FormaDePago(float monto, Date fecha) {
+    public FormaDePago(float monto) {
         this.monto = monto;
-        this.fecha = fecha;
+        this.fecha = generarFecha();
     }
 
     // Getters
@@ -19,7 +19,9 @@ public abstract class FormaDePago {
     public Date getFecha() {
         return fecha;
     }
-
+    private Date generarFecha() {
+        return new Date();
+    }
     // Setters
     public void setMonto(float monto) {
         this.monto = monto;

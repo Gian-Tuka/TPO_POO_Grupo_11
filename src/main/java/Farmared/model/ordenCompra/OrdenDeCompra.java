@@ -14,7 +14,7 @@ public class OrdenDeCompra {
     private Date fechaEmision;
     private Proveedor proveedor;
     private List<DetalleOC> detalles;
-    private Float precioTotalOC;
+    private float precioTotalOC;
     private EstadoOC estado;
     private Usuario creador;
     private Autorizacion autorizacion;
@@ -55,10 +55,6 @@ public class OrdenDeCompra {
 
     public void setEstado(EstadoOC estado) {
         this.estado = estado;
-    }
-
-    public void settearEstado(EstadoOC estado) {
-        this.setEstado(estado);
     }
 
     public Usuario obtenerCreador() {

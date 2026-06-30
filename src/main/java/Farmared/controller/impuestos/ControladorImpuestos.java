@@ -49,12 +49,25 @@ public class ControladorImpuestos {
         this.impuestos.add(nuevo);
     }
 
+    public void agregarRangoAImpuesto(String nroRetencion, float minimo, float maximo, float porcentaje) {
+        ImpuestoRetenible imp = buscarImpuestoPorNro(nroRetencion);
+        if (imp != null) {
+            imp.agregarRango(new Farmared.model.impuesto.RangoDeRetencion(minimo, maximo, porcentaje));
+        } else {
+            throw new Farmared.exception.FarmaredException("Impuesto no encontrado: " + nroRetencion);
+        }
+    }
+
     private ImpuestoRetenibleDTO toDTO(ImpuestoRetenible model) {
         return new ImpuestoRetenibleDTO(
                 model.getNroRetencion(),
                 model.getDescripcionRetencion(),
                 String.valueOf(model.getMinimoNoImponible())
         );
+    }
+
+    public ArrayList<ImpuestoRetenible> obtenerTodosLosImpuestosModelo(){
+        return this.impuestos;
     }
 
     private void cargarDatosSimulados() {

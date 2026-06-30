@@ -9,7 +9,7 @@ public class DetalleOC {
     private Item item;
     private int cantidad;
     private PrecioProveedor precioUnitario;
-    private Float subtotalPorItem;
+    private float subtotalPorItem;
 
     public DetalleOC(Item item, int cantidad) {
         this.item = item;
@@ -17,7 +17,7 @@ public class DetalleOC {
         this.subtotalPorItem = 0f;
     }
 
-    public Float calcularSubtotal() {
+    public float calcularSubtotal() {
         if (precioUnitario != null) {
             this.subtotalPorItem = cantidad * precioUnitario.getPrecioItem();
             return this.subtotalPorItem;
@@ -45,8 +45,8 @@ public class DetalleOC {
         return cantidad;
     }
 
-    public Float getSubtotalPorItem() {
-        return subtotalPorItem != null ? subtotalPorItem : 0f;
+    public float getSubtotalPorItem() {
+        return this.subtotalPorItem;
     }
 
     public float getPrecioUnitarioVal() {

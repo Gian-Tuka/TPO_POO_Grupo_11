@@ -2,6 +2,7 @@ package Farmared.view.proveedorGUI;
 
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.dto.proveedor.ProveedorDTO;
+import Farmared.exception.RubroNotExistException;
 import Farmared.utils.Validations;
 
 import javax.swing.*;
@@ -110,8 +111,10 @@ public class VistaAltaProveedor extends JDialog {
 
             // Obtenemos los rubros seleccionados en la JList
             ArrayList<String> rubrosSeleccionados = new ArrayList<>(listaRubros.getSelectedValuesList());
+            if (rubrosSeleccionados.isEmpty()) {
+                throw new RubroNotExistException("Debe seleccionar al menos un rubro");
+            }
 
-            //TODO: validaciones!!!
             if (!v.validCuit(txtCuit.getText())) {
                 throw new Exception("Cuit invalido");
             }

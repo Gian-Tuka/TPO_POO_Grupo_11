@@ -13,7 +13,7 @@ public class VistaModificacionFactura extends JDialog {
     private JComboBox<EstadoComprobante> comboEstado;
     private FacturaDTO factura;
 
-    public VistaModificacionFactura(JFrame parent, int nroComprobante) {
+    public VistaModificacionFactura(JFrame parent, String nroComprobante) {
         super(parent, "Modificar Factura", true);
         setSize(500, 450);
         setLocationRelativeTo(parent);

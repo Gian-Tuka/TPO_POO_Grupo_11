@@ -1,7 +1,9 @@
 package Farmared.model.comprobante;
 
+import Farmared.model.ordenCompra.DetalleOC;
 import Farmared.model.ordenCompra.OrdenDeCompra;
 import Farmared.model.proveedor.Proveedor;
+import Farmared.utils.GeneradorDeCodigos;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,42 +14,79 @@ public class Factura extends Comprobante {
     private OrdenDeCompra ordenDeCompra;
     private List<DetalleComprobante> detalles;
     private TipoFactura tipoFactura;
+    private float subTotalSinImpuestos;
+    private float totalImpuestos;
 
-    public Factura(int nroComprobante, Date fecha, Proveedor proveedor,
-                   String descripcion, OrdenDeCompra ordenDeCompra, TipoFactura tipoFactura) {
-        super(nroComprobante, fecha, 0f, proveedor, descripcion);
+    public Factura(Proveedor proveedor, String descripcion, OrdenDeCompra ordenDeCompra, TipoFactura tipoFactura) {
+        super(proveedor, descripcion);
+        this.nroComprobante = generarCodigoFactura();
+        this.fecha = obtenerFechaActual();
         this.ordenDeCompra = ordenDeCompra;
         this.tipoFactura = tipoFactura;
         this.detalles = new ArrayList<>();
     }
+    private String generarCodigoFactura() {
+        GeneradorDeCodigos gdc = new GeneradorDeCodigos();
+        return gdc.generarCodigo("FC", 4);
+    }
+
+    private Date obtenerFechaActual() {
+        return new Date();
+    }
 
     public void agregarDetalle(DetalleComprobante detalle) {
         this.detalles.add(detalle);
-        // Recalcular el monto total cada vez que se agrega un detalle
-        this.monto = calcularTotal();
+    }
+
+
+    public boolean tieneDesvios() {
+        if (this.ordenDeCompra == null) {
+            return true;
+        }
+
+        for (DetalleComprobante detFactura : this.detalles) {
+            boolean encontradoEnOC = false;
+
+            for (DetalleOC detOC : ordenDeCompra.getDetalles()) {
+                if (detFactura.getItem().getCodigo().equals(detOC.getItem().getCodigo())) {
+                    encontradoEnOC = true;
+
+                    // controlar diferencia de precio unitario (mayor o menor)
+                    if (Math.abs(detFactura.getPrecioFacturado() - detOC.getPrecioUnitarioVal()) > 0.01f) {
+                        return true;
+                    }
+                    break;
+                }
+            }
+            // Control de productos informados: Si el item de la factura no existía en la OC -> Desvío
+            if (!encontradoEnOC) {
+                return true;
+            }
+        }
+        return false; // Pasó todos los controles sin desvíos
+    }
+
+    public void calcularTotalesYSubtotales() {
+        float acumuladorSubtotal = 0f;
+        float acumuladorImpuestos = 0f;
+
+        for (DetalleComprobante detalle : detalles) {
+            acumuladorSubtotal += detalle.getSubTotal();
+            float porcentajeIva = extraerPorcentajeIva(detalle.getItem().getTipoDeIVA().name());
+            acumuladorImpuestos += detalle.getSubTotal() * (porcentajeIva / 100f);
+        }
+
+        this.subTotalSinImpuestos = acumuladorSubtotal;
+        this.totalImpuestos = acumuladorImpuestos;
+        this.monto = acumuladorSubtotal + acumuladorImpuestos;
         this.saldoPendiente = this.monto;
     }
 
-    public float calcularSubTotal() {
-        float subTotal = 0f;
-        for (DetalleComprobante detalle : detalles) {
-            subTotal += detalle.getSubTotal();
-        }
-        return subTotal;
-    }
-
-    /**
-     * Calcula el total de la factura sumando los subtotales de todos sus detalles.
-     * En esta implementación coincide con el subtotal; se puede extender para
-     * agregar impuestos u otros cargos.
-     */
-    public float calcularTotal() {
-        return calcularSubTotal();
-    }
-
-    @Override
-    public float getTotal() {
-        return calcularTotal();
+    private float extraerPorcentajeIva(String tipoIva) {
+        if ("IVA_21".equals(tipoIva)) return 21f;
+        if ("IVA_10_5".equals(tipoIva)) return 10.5f;
+        if ("IVA_27".equals(tipoIva)) return 27f;
+        return 0f;
     }
 
     // Getters

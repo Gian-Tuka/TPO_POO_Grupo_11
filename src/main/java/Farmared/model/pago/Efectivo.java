@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Efectivo extends FormaDePago {
 
-    public Efectivo(float monto, Date fecha) {
-        super(monto, fecha);
+    public Efectivo(float monto) {
+        super(monto);
     }
 }

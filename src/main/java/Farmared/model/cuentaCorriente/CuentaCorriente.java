@@ -24,22 +24,36 @@ public class CuentaCorriente {
         return deudaActual;
     }
 
+    public void setDeudaActual(float deudaActual) {
+        this.deudaActual = deudaActual;
+    }
+
     public float getTopeDeuda() {
         return topeDeuda;
     }
 
-    public Float calcularDeuda() {
-        return this.deudaActual;
+    public void agregarComprobante(Comprobante c) {
+        if (!comprobantes.contains(c)) {
+            comprobantes.add(c);
+        }
     }
 
-    // Bug 3 — Refactorización: actualiza deudaActual según el tipo de comprobante
-    public void agregarComprobante(Comprobante c) {
-        comprobantes.add(c);
-        if (c instanceof Factura || c instanceof NotaDebito) {
-            deudaActual += c.getTotal();
-        } else if (c instanceof NotaCredito) {
-            deudaActual -= c.getTotal();
+    // Bug 3 — Refactorización: actualiza deudaActual según el tipo de comprobante y su saldo pendiente
+    public void recalcularDeuda() {
+        deudaActual = 0f;
+        for (Comprobante c : comprobantes) {
+            // Impactan en CC los pendientes, autorizados y parcialmente pagados
+            if (c.getEstado() == Farmared.model.comprobante.EstadoComprobante.PENDIENTE || 
+                c.getEstado() == Farmared.model.comprobante.EstadoComprobante.AUTORIZADO ||
+                c.getEstado() == Farmared.model.comprobante.EstadoComprobante.PARCIALMENTE_PAGADO) {
+                if (c instanceof Factura || c instanceof NotaDebito) {
+                    deudaActual += c.getSaldoPendiente();
+                } else if (c instanceof NotaCredito) {
+                    deudaActual -= c.getSaldoPendiente();
+                }
+            }
         }
+        if (deudaActual < 0) deudaActual = 0f;
     }
 
     // Bug 11 — Setter faltante para topeDeuda

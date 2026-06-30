@@ -61,7 +61,7 @@ public class Proveedor {
     }
 
     // Sección  — Métodos de encapsulamiento faltantes
-    public void agregarImpuesto(ImpuestoRetenible impuesto) {
+    public void agregarImpuesto(ImpuestoRetenible impuesto) { //TODO: Metodo sin uso
         if (!impuestos.contains(impuesto)) {
             impuestos.add(impuesto);
         }
@@ -73,7 +73,7 @@ public class Proveedor {
 
     public void eliminarPrecioItem(PrecioProveedor pp) {
         precioPorItem.remove(pp);
-    }
+    } ////TODO: Metodo sin uso
 
 
     public String getCuit() {

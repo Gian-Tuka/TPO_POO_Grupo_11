@@ -2,13 +2,21 @@ package Farmared.controller.proveedores;
 
 import Farmared.controller.item.ControladorProductosYServicios;
 import Farmared.controller.ordenes.ControladorDeOrdenDeCompra;
+import Farmared.dto.comprobante.ComprobanteDTO;
 import Farmared.dto.proveedor.ProveedorDTO;
 import Farmared.dto.rubro.RubroDTO;
 import Farmared.dto.impuesto.CertificadoNoRetencionDTO;
 import Farmared.dto.proveedor.CuentaCorrienteDTO;
 import Farmared.dto.item.PrecioProveedorDTO;
 import Farmared.exception.FarmaredException;
+import Farmared.exception.InvalidTaxException;
 import Farmared.exception.ProveedorNoEncontradoException;
+import Farmared.exception.RubroNotExistException;
+import Farmared.model.comprobante.Comprobante;
+import Farmared.model.comprobante.Factura;
+import Farmared.model.comprobante.NotaCredito;
+import Farmared.model.comprobante.NotaDebito;
+import Farmared.model.cuentaCorriente.CuentaCorriente;
 import Farmared.model.item.Item;
 import Farmared.model.precio.PrecioProveedor;
 import Farmared.model.proveedor.CondicionIVA;
@@ -17,7 +25,6 @@ import Farmared.model.impuesto.ImpuestoRetenible;
 import Farmared.model.impuesto.CertificadoNoRetencion;
 import Farmared.model.rubro.Rubro;
 import Farmared.model.rubro.TipoRubro;
-import Farmared.model.user.Area;
 import Farmared.utils.Domicilio;
 import Farmared.utils.UtilDate;
 import Farmared.utils.Validations;
@@ -44,7 +51,7 @@ public class ControladorProveedores {
     }
 
     // Alta de Proveedor
-    public ProveedorDTO registrarProveedor(ProveedorDTO dto) throws Exception {
+    public ProveedorDTO registrarProveedor(ProveedorDTO dto) {
 
         if (buscarProveedorPorCuit(dto.getCuit()) != null) {
             throw new FarmaredException("Ya existe un proveedor registrado con el CUIT: " + dto.getCuit());
@@ -56,7 +63,7 @@ public class ControladorProveedores {
         for (String nombreRubro : dto.getIdsRubros()) {
             Rubro r = buscarRubroPorNombre(nombreRubro);
             if (r != null) {
-                nuevo.asociarRubro(r); // Bug 34 fix: usar método encapsulado
+                nuevo.asociarRubro(r);
             }
         }
 
@@ -64,7 +71,6 @@ public class ControladorProveedores {
         return toDTOProveedor(nuevo);
     }
 
-    // Bug 1 — modificarProveedor() ahora escribe el tope de deuda con setTopeDeuda()
     public ProveedorDTO modificarProveedor(ProveedorDTO dto) {
         Proveedor proveedor = buscarProveedorPorCuit(dto.getCuit());
         if (proveedor == null) {
@@ -78,9 +84,13 @@ public class ControladorProveedores {
         proveedor.setCorreo(dto.getCorreo());
         proveedor.setCondicionIVA(CondicionIVA.valueOf(dto.getCondicionIVA()));
         proveedor.setNroIngBru(dto.getNroIngBru());
-        proveedor.getCuentaCorriente().setTopeDeuda(dto.getTopeDeuda()); // Bug 1 fix
+        proveedor.getCuentaCorriente().setTopeDeuda(dto.getTopeDeuda());
 
         ArrayList<Rubro> nuevosRubros = new ArrayList<>();
+        if (dto.getIdsRubros() == null || dto.getIdsRubros().isEmpty()) {
+            throw new RubroNotExistException("El proveedor debe tener al menos un rubro asociado");
+        }
+
         for (String nombreRubro : dto.getIdsRubros()) {
             Rubro r = buscarRubroPorNombre(nombreRubro);
             if (r != null) {
@@ -92,7 +102,6 @@ public class ControladorProveedores {
         return toDTOProveedor(proveedor);
     }
 
-    // Bug 39 — eliminarProveedor() verifica referencias activas antes de eliminar
     public void eliminarProveedor(String cuit) {
         Proveedor prov = buscarProveedorPorCuit(cuit);
         if (prov == null) {
@@ -156,12 +165,12 @@ public class ControladorProveedores {
     }
 
     // Nuevos métodos para Certificados y Cuenta Corriente
-    public void registrarCertificadoNoRetencion(CertificadoNoRetencionDTO dto) throws Exception {
+    public void registrarCertificadoNoRetencion(CertificadoNoRetencionDTO dto) throws FarmaredException {
         Proveedor prov = buscarProveedorPorCuit(dto.getCuitProveedor());
         if (prov == null) throw new ProveedorNoEncontradoException(dto.getCuitProveedor());
 
         ImpuestoRetenible impuesto = Farmared.controller.impuestos.ControladorImpuestos.getInstance().buscarImpuestoPorNro(dto.getNroRetencion());
-        if (impuesto == null) throw new Exception("Impuesto no encontrado.");
+        if (impuesto == null) throw new InvalidTaxException("Impuesto no encontrado.");
 
         CertificadoNoRetencion cert = new CertificadoNoRetencion(
                 impuesto, 
@@ -176,14 +185,14 @@ public class ControladorProveedores {
         Proveedor prov = buscarProveedorPorCuit(cuit);
         if (prov == null) throw new ProveedorNoEncontradoException(cuit);
 
-        Farmared.model.cuentaCorriente.CuentaCorriente cc = prov.getCuentaCorriente();
+        CuentaCorriente cc = prov.getCuentaCorriente();
         
-        ArrayList<Farmared.dto.comprobante.ComprobanteDTO> comprobantesDTO = new ArrayList<>();
-        for (Farmared.model.comprobante.Comprobante comp : cc.getComprobantes()) {
+        ArrayList<ComprobanteDTO> comprobantesDTO = new ArrayList<>();
+        for (Comprobante comp : cc.getComprobantes()) {
             String tipo = "Comprobante";
-            if (comp instanceof Farmared.model.comprobante.Factura) tipo = "Factura";
-            else if (comp instanceof Farmared.model.comprobante.NotaCredito) tipo = "Nota Crédito";
-            else if (comp instanceof Farmared.model.comprobante.NotaDebito) tipo = "Nota Débito";
+            if (comp instanceof Factura) tipo = "Factura";
+            else if (comp instanceof NotaCredito) tipo = "Nota Crédito";
+            else if (comp instanceof NotaDebito) tipo = "Nota Débito";
 
             comprobantesDTO.add(new Farmared.dto.comprobante.ComprobanteDTO(
                     tipo, 
@@ -214,21 +223,19 @@ public class ControladorProveedores {
         return lista;
     }
 
-    // Bug 38 — registrarPrecioProveedor() usa métodos encapsulados
     public void registrarPrecioProveedor(String cuitProveedor, String codigoItem, float valorPrecio) {
         Proveedor prov = buscarProveedorPorCuit(cuitProveedor);
 
         // COMUNICACIÓN INTER-CONTROLADOR: Llamada al Singleton de Items para obtener el modelo real
-        Item item = ControladorProductosYServicios.getInstance().buscarItemModeloPorCodigo(codigoItem);
+        Item item = ControladorProductosYServicios.getInstance().buscarItem(codigoItem);
 
         Validations v = new Validations();
         v.requireNonNull(prov, "Error: No se encontró el Proveedor especificado.");
         v.requireNonNull(item, "Error: No se encontró el Artículo o Servicio.");
 
         // Construimos la clase intermedia de asociación
-        PrecioProveedor nuevoPrecio = new PrecioProveedor(item, prov, valorPrecio, new Date());
+        PrecioProveedor nuevoPrecio = new PrecioProveedor(item, prov, valorPrecio);
 
-        // Bug 38 fix: Usar métodos encapsulados en vez de acceso directo a listas internas
         prov.agregarPrecioItem(nuevoPrecio);
         item.agregarPrecio(nuevoPrecio);
     }
@@ -252,17 +259,6 @@ public class ControladorProveedores {
         return null;
     }
 
-    public boolean existeProveedor(Proveedor proveedor) {
-        return proveedores.contains(proveedor);
-    }
-
-    public Farmared.model.cuentaCorriente.CuentaCorriente cuentaCorriente(Proveedor proveedor) {
-        if (existeProveedor(proveedor)) {
-            return proveedor.getCuentaCorriente();
-        }
-        return null;
-    }
-
     public Rubro buscarRubroPorNombre(String nombre) {
         for (Rubro r : rubrosGlobales) {
             if (r.getNombreRubro().equals(nombre)) {
@@ -273,7 +269,7 @@ public class ControladorProveedores {
     }
 
     public RubroDTO altaRubro(RubroDTO dto) {
-        Rubro nuevo = new Rubro(dto.getNombre(), TipoRubro.valueOf(dto.getTipoRubro()));
+        Rubro nuevo = toModelRubro(dto);
         rubrosGlobales.add(nuevo);
         return toDTORubro(nuevo);
     }
@@ -283,12 +279,7 @@ public class ControladorProveedores {
 
         for (Rubro r : this.rubrosGlobales) {
             // Transformamos cada Modelo Rubro en un RubroDTO
-            RubroDTO dto = new RubroDTO(
-                    r.getIdRubro(),
-                    r.getNombreRubro(),
-                    r.getTipoRubro().name()
-            );
-            listaRubrosDTO.add(dto);
+            listaRubrosDTO.add(toDTORubro(r));
         }
 
         return listaRubrosDTO;
@@ -310,7 +301,6 @@ public class ControladorProveedores {
             nombresRubros.add(r.getNombreRubro());
         }
 
-        // Anti-patrón fix: llamada estática directa
         String fechaStr = UtilDate.parseDate(model.getFechaInicioActividades());
 
         return new ProveedorDTO(
@@ -354,7 +344,6 @@ public class ControladorProveedores {
                 dto.getPais()
         );
 
-        // Bug 13 fix: parsear la fecha del DTO en vez de usar new Date()
         Date fechaInicioActividades;
         if (dto.getFechaInicioActividades() != null && !dto.getFechaInicioActividades().isEmpty()) {
             fechaInicioActividades = UtilDate.toDate(dto.getFechaInicioActividades());

@@ -3,9 +3,9 @@ package Farmared.controller.ordenes;
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
 import Farmared.controller.item.ControladorProductosYServicios;
-import Farmared.dto.ordenes.OrdenDeCompraDTO;
-import Farmared.dto.ordenes.DetalleOCDTO;
-import Farmared.dto.ordenes.DetalleItemDTO;
+import Farmared.dto.ordenesDeCompra.OrdenDeCompraDTO;
+import Farmared.dto.ordenesDeCompra.DetalleOCDTO;
+import Farmared.dto.ordenesDeCompra.DetalleItemDTO;
 import Farmared.dto.user.UsuarioDTO;
 import Farmared.dto.item.ItemDTO;
 import Farmared.exception.FarmaredException;
@@ -29,7 +29,7 @@ import java.util.List;
 public class ControladorDeOrdenDeCompra {
     private static ControladorDeOrdenDeCompra instance = null;
 
-    private List<OrdenDeCompra> ordenesDeCompra;
+    private final ArrayList<OrdenDeCompra> ordenesDeCompra;
 
     private ControladorDeOrdenDeCompra() {
         this.ordenesDeCompra = new ArrayList<>();
@@ -42,8 +42,7 @@ public class ControladorDeOrdenDeCompra {
         return instance;
     }
 
-    // Método de mapeo privado de Modelo a DTO
-    private static OrdenDeCompraDTO toDTO(OrdenDeCompra model) {
+    private static OrdenDeCompraDTO toDTOOrdenDeCompra(OrdenDeCompra model) {
         if (model == null) return null;
         List<DetalleOCDTO> detallesDTO = new ArrayList<>();
         for (DetalleOC det : model.getDetalles()) {
@@ -66,6 +65,25 @@ public class ControladorDeOrdenDeCompra {
             creadorLegajo,
             detallesDTO
         );
+    }
+
+    private OrdenDeCompra toModelOrdenDeCompra(OrdenDeCompraDTO dto) {
+        Proveedor prov = ControladorProveedores.getInstance().buscarProveedorModelo(dto.getCuitProveedor());
+        Usuario creador = ControladorUsuariosYSeguridad.getInstance().buscarUsuario(dto.getCreadorLegajo());
+
+        OrdenDeCompra oc = new OrdenDeCompra(prov);
+        oc.setCreador(creador);
+
+        for (DetalleItemDTO detDto : dto.getItems()) {
+            Item item = ControladorProductosYServicios
+                    .getInstance()
+                    .buscarItem(detDto.getCodigoItem());
+            if (item == null) {
+                throw new ItemNoEncontradoException(detDto.getCodigoItem());
+            }
+            oc.crearDetalle(item, detDto.getCantidad());
+        }
+        return oc;
     }
 
     // Filtrar ítems del catálogo que tienen un precio definido para el proveedor elegido
@@ -92,64 +110,33 @@ public class ControladorDeOrdenDeCompra {
 
     // Emisión de la Orden de Compra desde la GUI mediante DTO
     public OrdenDeCompraDTO emitirOC(OrdenDeCompraDTO dto) {
-        // 1. Obtener usuario actual y buscar su modelo
-        UsuarioDTO usuarioActualDTO = ControladorUsuariosYSeguridad.getInstance().getUsuarioActual();
+        UsuarioDTO usuarioActualDTO = ControladorUsuariosYSeguridad
+                .getInstance().getUsuarioActual();
         if (usuarioActualDTO == null) {
-            throw new FarmaredException("No hay un usuario logueado en el sistema.");
+            throw new FarmaredException("No hay un usuario logueado.");
         }
+        Usuario usuarioActual = ControladorUsuariosYSeguridad
+                .getInstance().buscarUsuario(usuarioActualDTO.getLegajo());
 
-        Usuario usuarioActual = ControladorUsuariosYSeguridad.getInstance().buscarUsuario(usuarioActualDTO.getLegajo());
-        if (usuarioActual == null) {
-            throw new FarmaredException("Usuario actual no encontrado en la base de datos.");
-        }
-
-        // 2. Buscar proveedor
-        Proveedor proveedor = ControladorProveedores.getInstance().buscarProveedorModelo(dto.getCuitProveedor());
+        Proveedor proveedor = ControladorProveedores
+                .getInstance().buscarProveedorModelo(dto.getCuitProveedor());
         if (proveedor == null) {
             throw new ProveedorNoEncontradoException(dto.getCuitProveedor());
         }
-
-        // 3. Crear OrdenDeCompra (nroOC y fechaEmision se generan internamente)
-        OrdenDeCompra oc = new OrdenDeCompra(proveedor);
-        oc.setCreador(usuarioActual);
-
-        // 4. Agregar detalles
         if (dto.getItems() == null || dto.getItems().isEmpty()) {
-            throw new FarmaredException("No se puede emitir una orden de compra vacía.");
+            throw new FarmaredException("No se puede emitir una OC vacía.");
         }
 
-        for (DetalleItemDTO detDto : dto.getItems()) {
-            Item item = ControladorProductosYServicios.getInstance().buscarItemModeloPorCodigo(detDto.getCodigoItem());
-            if (item == null) {
-                throw new ItemNoEncontradoException(detDto.getCodigoItem());
-            }
-            oc.crearDetalle(item, detDto.getCantidad());
-        }
+        OrdenDeCompra oc = toModelOrdenDeCompra(dto);
 
-        // 5. Validar límite de deuda
-        float totalOC = oc.obtenerTotalOC();
-        boolean limiteOk = validarLimite(proveedor, totalOC);
-        if (limiteOk) {
+        if (validarLimite(proveedor, oc.obtenerTotalOC())) {
             oc.setEstado(EstadoOC.APROBADA);
         } else {
             oc.setEstado(EstadoOC.PENDIENTE_AUTORIZACION);
         }
 
-        // 6. Añadir a la lista interna y retornar
         ordenesDeCompra.add(oc);
-        return toDTO(oc);
-    }
-
-    public Boolean existeProveedor(Proveedor proveedor) {
-        return ControladorProveedores.getInstance().buscarProveedorModelo(proveedor.getCuit()) != null;
-    }
-
-    public void añadirOC(OrdenDeCompra oc) {
-        this.ordenesDeCompra.add(oc);
-    }
-
-    public Float obtenerTotalOC(OrdenDeCompra oc) {
-        return oc.obtenerTotalOC();
+        return toDTOOrdenDeCompra(oc);
     }
 
     public Boolean validarLimite(Proveedor proveedor, Float total) {
@@ -175,7 +162,7 @@ public class ControladorDeOrdenDeCompra {
     public ArrayList<OrdenDeCompraDTO> obtenerOrdenesDeCompraDTO() {
         ArrayList<OrdenDeCompraDTO> dtos = new ArrayList<>();
         for (OrdenDeCompra oc : ordenesDeCompra) {
-            dtos.add(toDTO(oc));
+            dtos.add(toDTOOrdenDeCompra(oc));
         }
         return dtos;
     }
@@ -183,7 +170,7 @@ public class ControladorDeOrdenDeCompra {
     public OrdenDeCompraDTO consultarOC(String nroOC) {
         for (OrdenDeCompra oc : ordenesDeCompra) {
             if (oc.getNroOC().equals(nroOC)) {
-                return toDTO(oc);
+                return toDTOOrdenDeCompra(oc);
             }
         }
         throw new FarmaredException("No se encontró la Orden de Compra: " + nroOC);
@@ -220,7 +207,13 @@ public class ControladorDeOrdenDeCompra {
         oc.setEstado(EstadoOC.APROBADA_AUTORIZACION);
     }
 
-    public List<OrdenDeCompra> getOrdenesDeCompra() {
-        return ordenesDeCompra;
+    public OrdenDeCompra buscarOrdenDeCompraModelo(String nroOC) {
+        if (nroOC == null || nroOC.isEmpty()) return null;
+        for (OrdenDeCompra oc : ordenesDeCompra) {
+            if (oc.getNroOC().equals(nroOC)) {
+                return oc;
+            }
+        }
+        return null;
     }
 }

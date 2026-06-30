@@ -11,17 +11,20 @@ public class PrecioProveedor {
     private float precioItem;
     private Date fecha;
 
-    public PrecioProveedor(Item item, Proveedor proveedor, float precioItem, Date fecha) {
+    public PrecioProveedor(Item item, Proveedor proveedor, float precioItem) {
         this.item = item;
         this.proveedor = proveedor;
         this.precioItem = precioItem;
-        this.fecha = fecha;
+        this.fecha = obtenerFecha();
     }
 
     public Item getItem() { return item; }
     public Proveedor getProveedor() { return proveedor; }
     public float getPrecioItem() { return precioItem; }
     public Date getFecha() { return fecha; }
+    private Date obtenerFecha() {
+        return new Date();
+    }
 
     // Setter faltante para precio (sección 1.1) — ítem y proveedor son inmutables por diseño
     public void setPrecio(float precio) {

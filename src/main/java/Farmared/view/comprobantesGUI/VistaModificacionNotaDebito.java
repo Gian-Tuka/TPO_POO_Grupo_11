@@ -21,7 +21,7 @@ public class VistaModificacionNotaDebito extends JDialog {
         getContentPane().setBackground(new Color(245, 245, 250));
 
         for (NotaDebitoDTO nd : ControladorComprobantes.getInstance().obtenerNotasDeDebitoDTO()) {
-            if (nd.getNroComprobante() == nroComprobante) {
+            if (nd.getNroComprobante().equals(nroComprobante)) {
                 notaDebito = nd;
                 break;
             }

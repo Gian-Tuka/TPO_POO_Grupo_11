@@ -6,6 +6,7 @@ import Farmared.dto.comprobante.NotaCreditoDTO;
 import Farmared.dto.comprobante.NotaDebitoDTO;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
@@ -23,149 +24,170 @@ public class GUIComprobantes extends JPanel {
 
     public GUIComprobantes(JFrame ventanaPrincipal) {
         this.ventanaPrincipal = ventanaPrincipal;
-        this.setLayout(new BorderLayout(10, 10));
-        this.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        this.setBackground(new Color(245, 245, 250));
+        this.setLayout(new BorderLayout(15, 15));
+        this.setBorder(new EmptyBorder(25, 25, 25, 25));
+        this.setBackground(Color.WHITE);
 
-        // --- BARRA DE ACCIONES ---
-        JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        barraAcciones.setBackground(new Color(245, 245, 250));
+        // --- TÍTULO ---
+        JLabel lblTitulo = new JLabel("Gestión de Comprobantes", SwingConstants.LEFT);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblTitulo.setForeground(new Color(44, 62, 80));
+        add(lblTitulo, BorderLayout.NORTH);
 
-        JButton btnAltaFactura = crearBoton("Alta Factura", new Color(46, 204, 113));
-        JButton btnModFactura = crearBoton("Modificar Factura", new Color(52, 152, 219));
-        JButton btnAltaND = crearBoton("Alta Nota Débito", new Color(155, 89, 182));
-        JButton btnModND = crearBoton("Modificar Nota Débito", new Color(41, 128, 185));
-        JButton btnAltaNC = crearBoton("Alta Nota Crédito", new Color(230, 126, 34));
-        JButton btnModNC = crearBoton("Modificar Nota Crédito", new Color(26, 188, 156));
+        // --- CONTENIDO CENTRAL ---
+        JPanel panelCentro = new JPanel(new BorderLayout(0, 15));
+        panelCentro.setBackground(Color.WHITE);
+
+        // Barra de acciones
+        JPanel barraAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+        barraAcciones.setBackground(Color.WHITE);
+
+        JButton btnAltaFactura = crearBotonAccion("Nueva Factura", new Color(52, 152, 219));
+        btnAltaFactura.addActionListener(e -> {
+            VistaAltaFactura v = new VistaAltaFactura(ventanaPrincipal);
+            v.setVisible(true);
+            actualizarTablas();
+        });
+
+        JButton btnAltaNC = crearBotonAccion("Nueva Nota Crédito", new Color(46, 204, 113));
+        btnAltaNC.addActionListener(e -> {
+            VistaAltaNotaCredito v = new VistaAltaNotaCredito(ventanaPrincipal);
+            v.setVisible(true);
+            actualizarTablas();
+        });
+
+        JButton btnAltaND = crearBotonAccion("Nueva Nota Débito", new Color(155, 89, 182));
+        btnAltaND.addActionListener(e -> {
+            VistaAltaNotaDebito v = new VistaAltaNotaDebito(ventanaPrincipal);
+            v.setVisible(true);
+            actualizarTablas();
+        });
+
+        JButton btnAuditar = crearBotonAccion("Autorizar / Auditar Seleccionado", new Color(241, 196, 15));
+        btnAuditar.addActionListener(e -> abrirAuditoriaComprobante());
 
         barraAcciones.add(btnAltaFactura);
-        barraAcciones.add(btnModFactura);
-        barraAcciones.add(btnAltaND);
-        barraAcciones.add(btnModND);
         barraAcciones.add(btnAltaNC);
-        barraAcciones.add(btnModNC);
+        barraAcciones.add(btnAltaND);
+        barraAcciones.add(btnAuditar);
+        panelCentro.add(barraAcciones, BorderLayout.NORTH);
 
-        this.add(barraAcciones, BorderLayout.NORTH);
+        // --- SECCIÓN TABLAS ---
+        JPanel contenedorTablas = new JPanel(new GridLayout(3, 1, 0, 20));
+        contenedorTablas.setBackground(Color.WHITE);
 
-        // --- TABLAS ---
-        JPanel panelTablas = new JPanel(new GridLayout(1, 3, 10, 0));
-        panelTablas.setBackground(new Color(245, 245, 250));
-
-        String[] columnas = {"Nro", "Proveedor", "Descripción", "Monto", "Estado"};
-
-        // Facturas
-        modeloFacturas = new DefaultTableModel(columnas, 0) {
+        modeloFacturas = new DefaultTableModel(new Object[]{"Nro Comprobante", "Proveedor", "Descripción", "Total", "Estado"}, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
         };
-        tablaFacturas = crearTabla(modeloFacturas);
-        panelTablas.add(crearPanelTabla("Facturas", tablaFacturas));
+        tablaFacturas = crearTablaEstilizada(modeloFacturas);
+        contenedorTablas.add(crearPanelTabla("Facturas Recibidas", tablaFacturas, new Color(52, 152, 219)));
 
-        // Notas de Débito
-        modeloNotasDebito = new DefaultTableModel(columnas, 0) {
+        modeloNotasDebito = new DefaultTableModel(new Object[]{"Nro Comprobante", "Proveedor", "Descripción", "Monto", "Estado"}, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
         };
-        tablaNotasDebito = crearTabla(modeloNotasDebito);
-        panelTablas.add(crearPanelTabla("Notas de Débito", tablaNotasDebito));
+        tablaNotasDebito = crearTablaEstilizada(modeloNotasDebito);
+        contenedorTablas.add(crearPanelTabla("Notas de Débito", tablaNotasDebito, new Color(155, 89, 182)));
 
-        // Notas de Crédito
-        modeloNotasCredito = new DefaultTableModel(columnas, 0) {
+        modeloNotasCredito = new DefaultTableModel(new Object[]{"Nro Comprobante", "Proveedor", "Descripción", "Monto", "Estado"}, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
         };
-        tablaNotasCredito = crearTabla(modeloNotasCredito);
-        panelTablas.add(crearPanelTabla("Notas de Crédito", tablaNotasCredito));
+        tablaNotasCredito = crearTablaEstilizada(modeloNotasCredito);
+        contenedorTablas.add(crearPanelTabla("Notas de Crédito", tablaNotasCredito, new Color(46, 204, 113)));
 
-        this.add(panelTablas, BorderLayout.CENTER);
-
-        // --- LISTENERS ---
-        btnAltaFactura.addActionListener(e -> {
-            VistaAltaFactura vista = new VistaAltaFactura(ventanaPrincipal);
-            vista.setVisible(true);
-            actualizarTablas();
-        });
-
-        btnModFactura.addActionListener(e -> {
-            int fila = tablaFacturas.getSelectedRow();
-            if (fila >= 0) {
-                int nro = (int) tablaFacturas.getValueAt(fila, 0);
-                VistaModificacionFactura vista = new VistaModificacionFactura(ventanaPrincipal, nro);
-                vista.setVisible(true);
-                actualizarTablas();
-            } else {
-                JOptionPane.showMessageDialog(this, "Seleccione una factura a modificar.");
-            }
-        });
-
-        btnAltaND.addActionListener(e -> {
-            VistaAltaNotaDebito vista = new VistaAltaNotaDebito(ventanaPrincipal);
-            vista.setVisible(true);
-            actualizarTablas();
-        });
-
-        btnModND.addActionListener(e -> {
-            int fila = tablaNotasDebito.getSelectedRow();
-            if (fila >= 0) {
-                int nro = (int) tablaNotasDebito.getValueAt(fila, 0);
-                VistaModificacionNotaDebito vista = new VistaModificacionNotaDebito(ventanaPrincipal, nro);
-                vista.setVisible(true);
-                actualizarTablas();
-            } else {
-                JOptionPane.showMessageDialog(this, "Seleccione una nota de débito a modificar.");
-            }
-        });
-
-        btnAltaNC.addActionListener(e -> {
-            VistaAltaNotaCredito vista = new VistaAltaNotaCredito(ventanaPrincipal);
-            vista.setVisible(true);
-            actualizarTablas();
-        });
-
-        btnModNC.addActionListener(e -> {
-            int fila = tablaNotasCredito.getSelectedRow();
-            if (fila >= 0) {
-                int nro = (int) tablaNotasCredito.getValueAt(fila, 0);
-                VistaModificacionNotaCredito vista = new VistaModificacionNotaCredito(ventanaPrincipal, nro);
-                vista.setVisible(true);
-                actualizarTablas();
-            } else {
-                JOptionPane.showMessageDialog(this, "Seleccione una nota de crédito a modificar.");
-            }
-        });
+        panelCentro.add(contenedorTablas, BorderLayout.CENTER);
+        add(panelCentro, BorderLayout.CENTER);
 
         actualizarTablas();
     }
 
-    private JButton crearBoton(String texto, Color bg) {
+    private JButton crearBotonAccion(String texto, Color bg) {
         JButton btn = new JButton(texto);
         btn.setBackground(bg);
-        btn.setForeground(Color.BLACK);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btn.setFocusPainted(false);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
     }
 
-    private JTable crearTabla(DefaultTableModel modelo) {
-        JTable tabla = new JTable(modelo);
-        tabla.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tabla.setRowHeight(25);
-        JTableHeader header = tabla.getTableHeader();
-        header.setBackground(new Color(230, 126, 34));
-        header.setForeground(Color.WHITE);
+    private JTable crearTablaEstilizada(DefaultTableModel modelo) {
+        JTable t = new JTable(modelo);
+        t.setRowHeight(30);
+        t.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        t.setShowVerticalLines(false);
+        t.setGridColor(new Color(230, 230, 230));
+
+        JTableHeader header = t.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        return tabla;
+        header.setBackground(new Color(245, 245, 250));
+        header.setForeground(new Color(44, 62, 80));
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)));
+        return t;
     }
 
-    private JPanel crearPanelTabla(String titulo, JTable tabla) {
+    private JPanel crearPanelTabla(String titulo, JTable tabla, Color accentColor) {
         JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(new Color(245, 245, 250));
-        JLabel lbl = new JLabel(titulo, SwingConstants.CENTER);
+        p.setBackground(Color.WHITE);
+        p.setBorder(BorderFactory.createLineBorder(new Color(220, 224, 230), 1));
+
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(Color.WHITE);
+        headerPanel.setBorder(BorderFactory.createMatteBorder(0, 4, 1, 0, accentColor));
+        
+        JLabel lbl = new JLabel("  " + titulo);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lbl.setForeground(new Color(44, 62, 80));
-        lbl.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-        p.add(lbl, BorderLayout.NORTH);
-        p.add(new JScrollPane(tabla), BorderLayout.CENTER);
+        lbl.setBorder(new EmptyBorder(10, 5, 10, 5));
+        
+        headerPanel.add(lbl, BorderLayout.CENTER);
+
+        p.add(headerPanel, BorderLayout.NORTH);
+        
+        JScrollPane scrollPane = new JScrollPane(tabla);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        p.add(scrollPane, BorderLayout.CENTER);
+        
         return p;
+    }
+
+    private void abrirAuditoriaComprobante() {
+        String codigoSeleccionado = null;
+        int tipoComprobante = -1; // 0: Factura, 1: ND, 2: NC
+
+        if (tablaFacturas.getSelectedRow() >= 0) {
+            codigoSeleccionado = tablaFacturas.getValueAt(tablaFacturas.getSelectedRow(), 0).toString();
+            tipoComprobante = 0;
+        } else if (tablaNotasDebito.getSelectedRow() >= 0) {
+            codigoSeleccionado = tablaNotasDebito.getValueAt(tablaNotasDebito.getSelectedRow(), 0).toString();
+            tipoComprobante = 1;
+        } else if (tablaNotasCredito.getSelectedRow() >= 0) {
+            codigoSeleccionado = tablaNotasCredito.getValueAt(tablaNotasCredito.getSelectedRow(), 0).toString();
+            tipoComprobante = 2;
+        }
+
+        if (codigoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un comprobante de alguna tabla para auditar.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (tipoComprobante == 2) {
+            VistaModificacionNotaCredito v = new VistaModificacionNotaCredito(ventanaPrincipal, codigoSeleccionado);
+            v.setVisible(true);
+        } else {
+            int conf = JOptionPane.showConfirmDialog(this, "¿Desea dar autorización formal al comprobante " + codigoSeleccionado + "?", "Auditoría de Comprobantes", JOptionPane.YES_NO_OPTION);
+            if (conf == JOptionPane.YES_OPTION) {
+                try {
+                    ControladorComprobantes.getInstance().autorizarComprobante(codigoSeleccionado);
+                    JOptionPane.showMessageDialog(this, "Comprobante autorizado correctamente. Se han impactado los saldos en la Cuenta Corriente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error al autorizar: " + ex.getMessage(), "Error de Negocio", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+        actualizarTablas();
     }
 
     public void actualizarTablas() {
@@ -176,14 +198,14 @@ public class GUIComprobantes extends JPanel {
         }
 
         modeloNotasDebito.setRowCount(0);
-        ArrayList<NotaDebitoDTO> notasDebito = ControladorComprobantes.getInstance().obtenerNotasDeDebitoDTO();
-        for (NotaDebitoDTO nd : notasDebito) {
+        ArrayList<NotaDebitoDTO> intentND = ControladorComprobantes.getInstance().obtenerNotasDeDebitoDTO();
+        for (NotaDebitoDTO nd : intentND) {
             modeloNotasDebito.addRow(new Object[]{nd.getNroComprobante(), nd.getRazonSocialProveedor(), nd.getDescripcion(), nd.getMonto(), nd.getEstado()});
         }
 
         modeloNotasCredito.setRowCount(0);
-        ArrayList<NotaCreditoDTO> notasCredito = ControladorComprobantes.getInstance().obtenerNotasDeCreditoDTO();
-        for (NotaCreditoDTO nc : notasCredito) {
+        ArrayList<NotaCreditoDTO> intentNC = ControladorComprobantes.getInstance().obtenerNotasDeCreditoDTO();
+        for (NotaCreditoDTO nc : intentNC) {
             modeloNotasCredito.addRow(new Object[]{nc.getNroComprobante(), nc.getRazonSocialProveedor(), nc.getDescripcion(), nc.getMonto(), nc.getEstado()});
         }
     }

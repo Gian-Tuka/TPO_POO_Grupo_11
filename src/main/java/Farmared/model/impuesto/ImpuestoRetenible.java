@@ -25,6 +25,10 @@ public class ImpuestoRetenible {
     public float getMinimoNoImponible() { return minimoNoImponible; }
     public List<RangoDeRetencion> getRangos() { return Collections.unmodifiableList(rangosDeRetencion); }
 
+    public void agregarRango(RangoDeRetencion rango) {
+        this.rangosDeRetencion.add(rango);
+    }
+
     // Bug 8 — Setter para minimoNoImponible
     public void setMinimoNoImponible(float minimoNoImponible) { this.minimoNoImponible = minimoNoImponible; }
 }

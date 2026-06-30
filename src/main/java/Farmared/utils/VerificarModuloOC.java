@@ -4,15 +4,14 @@ import Farmared.controller.ordenes.ControladorDeOrdenDeCompra;
 import Farmared.controller.proveedores.ControladorProveedores;
 import Farmared.controller.usuariosYSeguridad.ControladorUsuariosYSeguridad;
 import Farmared.controller.item.ControladorProductosYServicios;
-import Farmared.dto.ordenes.OrdenDeCompraDTO;
-import Farmared.dto.ordenes.DetalleItemDTO;
-import Farmared.dto.ordenes.DetalleOCDTO;
+import Farmared.dto.ordenesDeCompra.OrdenDeCompraDTO;
+import Farmared.dto.ordenesDeCompra.DetalleItemDTO;
+import Farmared.dto.ordenesDeCompra.DetalleOCDTO;
 import Farmared.dto.proveedor.ProveedorDTO;
 import Farmared.dto.rubro.RubroDTO;
 import Farmared.dto.item.ItemDTO;
 import Farmared.dto.item.UnidadDeMedidaDTO;
 import Farmared.dto.user.UsuarioDTO;
-import Farmared.model.ordenCompra.EstadoOC;
 
 import java.util.ArrayList;
 import java.util.List;

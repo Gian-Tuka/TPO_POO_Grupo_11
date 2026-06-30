@@ -6,7 +6,7 @@ import Farmared.model.proveedor.Proveedor;
 import java.util.Date;
 
 public abstract class Comprobante {
-    protected int nroComprobante;
+    protected String nroComprobante;
     protected Date fecha;
     protected float monto;
     protected float saldoPendiente;
@@ -15,14 +15,10 @@ public abstract class Comprobante {
     protected String descripcion;
     protected Autorizacion autorizacion;
 
-    public Comprobante(int nroComprobante, Date fecha, float monto, Proveedor proveedor, String descripcion) {
-        this.nroComprobante = nroComprobante;
-        this.fecha = fecha;
-        this.monto = monto;
-        this.saldoPendiente = monto;
+    public Comprobante(Proveedor proveedor, String descripcion) {
         this.proveedor = proveedor;
-        this.estado = EstadoComprobante.PENDIENTE;
         this.descripcion = descripcion;
+        this.estado = EstadoComprobante.PENDIENTE;
     }
 
     /**
@@ -35,7 +31,7 @@ public abstract class Comprobante {
     }
 
     // Getters
-    public int getNroComprobante() {
+    public String getNroComprobante() {
         return nroComprobante;
     }
 

@@ -23,7 +23,9 @@ public class GUIItem extends JPanel {
         JButton btnCrear = new JButton("Crear Ítem");
         JButton btnModificar = new JButton("Modificar Ítem");
         JButton btnEliminar = new JButton("Eliminar Ítem");
-        JButton btnGestionarUDM = new JButton("Gestionar UDM");
+        JButton btnGestionarUDM = new JButton("Crear UDM");
+        JButton btnModificarUDM = new JButton("Modificar UDM");
+        JButton btnEliminarUDM = new JButton("Eliminar UDM");
         JButton btnPreciosProv = new JButton("Ver Precios por Prov.");
 
         barraAcciones.add(btnCrear);
@@ -31,6 +33,8 @@ public class GUIItem extends JPanel {
         barraAcciones.add(btnEliminar);
         barraAcciones.add(new JSeparator(SwingConstants.VERTICAL));
         barraAcciones.add(btnGestionarUDM);
+        barraAcciones.add(btnModificarUDM);
+        barraAcciones.add(btnEliminarUDM);
         barraAcciones.add(btnPreciosProv);
 
         this.add(barraAcciones, BorderLayout.NORTH);
@@ -69,9 +73,19 @@ public class GUIItem extends JPanel {
         });
 
         btnGestionarUDM.addActionListener(e -> {
-            VistaABMUnidadDeMedida vistaUDM = new VistaABMUnidadDeMedida(ventanaPrincipal);
+            VistaAltaUnidadDeMedida vistaUDM = new VistaAltaUnidadDeMedida(ventanaPrincipal);
             vistaUDM.setVisible(true);
             actualizarTabla(); 
+        });
+        btnModificarUDM.addActionListener(e -> {
+            VistaModificarUnidadDeMedida vistaUDM = new VistaModificarUnidadDeMedida(ventanaPrincipal);
+            vistaUDM.setVisible(true);
+            actualizarTabla();
+        });
+        btnEliminarUDM.addActionListener(e -> {
+            VistaEliminarUnidadDeMedida vistaUDM = new VistaEliminarUnidadDeMedida(ventanaPrincipal);
+            vistaUDM.setVisible(true);
+            actualizarTabla();
         });
 
         btnPreciosProv.addActionListener(e -> {

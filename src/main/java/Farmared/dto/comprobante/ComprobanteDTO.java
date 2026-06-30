@@ -2,11 +2,11 @@ package Farmared.dto.comprobante;
 
 public class ComprobanteDTO {
     private String tipoComprobante;
-    private int numero;
+    private String numero;
     private String fecha;
     private float montoTotal;
 
-    public ComprobanteDTO(String tipoComprobante, int numero, String fecha, float montoTotal) {
+    public ComprobanteDTO(String tipoComprobante, String numero, String fecha, float montoTotal) {
         this.tipoComprobante = tipoComprobante;
         this.numero = numero;
         this.fecha = fecha;
@@ -21,12 +21,8 @@ public class ComprobanteDTO {
         this.tipoComprobante = tipoComprobante;
     }
 
-    public int getNumero() {
+    public String getNumero() {
         return numero;
-    }
-
-    public void setNumero(int numero) {
-        this.numero = numero;
     }
 
     public String getFecha() {

@@ -1,4 +1,4 @@
-package Farmared.dto.ordenes;
+package Farmared.dto.ordenesDeCompra;
 
 public class DetalleOCDTO {
     private String codigoItem;
