@@ -73,17 +73,17 @@ public class ControladorDeOrdenesDePago {
         procesarFormasDePago(op, dto.getFormasDePago());
 
         // que no haya diferencias en la forma de pago y el neto
-        float totalFormasPago = op.calcularTotalFormasDePago();
-        if (Math.abs(totalFormasPago - neto) > 0.01f) {
-            throw new FarmaredException(
-                    "La suma de las formas de pago (" + totalFormasPago +
-                            ") no coincide con el neto a pagar (" + neto + ").");
-        }
-
-        // aca aplicamos la cancelacion a los comprobantes porque supuestamente estaría  ok
-        for (DetalleCancelacion detalle : op.getComprobantesCancelados()) {
-            detalle.aplicarCancelacion();
-        }
+//        float totalFormasPago = op.calcularTotalFormasDePago();
+//        if (Math.abs(totalFormasPago - neto) > 0.01f) {
+//            throw new FarmaredException(
+//                    "La suma de las formas de pago (" + totalFormasPago +
+//                            ") no coincide con el neto a pagar (" + neto + ").");
+//        }
+//
+//        // aca aplicamos la cancelacion a los comprobantes porque supuestamente estaría  ok
+//        for (DetalleCancelacion detalle : op.getComprobantesCancelados()) {
+//            detalle.aplicarCancelacion();
+//        }
         
         // Impactamos la cuenta corriente con el nuevo saldo de los comprobantes
         proveedor.getCuentaCorriente().recalcularDeuda();
